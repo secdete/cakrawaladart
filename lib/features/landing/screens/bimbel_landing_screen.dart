@@ -168,6 +168,25 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final url = Uri.parse(
+            'https://wa.me/6281324868790?text=${Uri.encodeComponent('Halo Tim Cakrawala, saya ingin berkonsultasi mengenai bimbingan belajar.')}',
+          );
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
+          }
+        },
+        backgroundColor: const Color(0xFF25D366), // WhatsApp Green
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.chat_rounded),
+        label: Text(
+          'Chat Kami',
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
     );
   }
 

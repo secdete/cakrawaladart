@@ -86,6 +86,7 @@ class BimbelProgram {
       features: (json['features'] as List<dynamic>? ?? const []).cast<String>(),
       isPopular: json['isPopular'] as bool? ?? false,
       illustrationType: json['illustrationType'] as String? ?? 'default',
+      imageAsset: json['imageAsset'] as String? ?? 'assets/images/promo1.jpg',
     );
   }
 

@@ -33,24 +33,31 @@ class LandingApiService {
   final Uri _baseUri;
 
   Future<List<BimbelProgram>> fetchPrograms(String grade) async {
-    final uri = _baseUri.resolve('programs').replace(
-      queryParameters: grade.isEmpty ? null : {'grade': grade},
-    );
-    final response = await _client
-        .get(uri, headers: const {'Accept': 'application/json'})
-        .timeout(const Duration(seconds: 12));
-    final body = _decodeResponse(response);
-    final items = body['items'];
-    if (items is! List) {
-      throw const LandingApiException('Format katalog dari server tidak valid.');
+    try {
+      final uri = _baseUri.resolve('programs').replace(
+        queryParameters: grade.isEmpty ? null : {'grade': grade},
+      );
+      final response = await _client
+          .get(uri, headers: const {'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 3));
+      final body = _decodeResponse(response);
+      final items = body['items'];
+      if (items is! List) {
+        throw const LandingApiException('Format katalog dari server tidak valid.');
+      }
+      return items
+          .map(
+            (item) => BimbelProgram.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false);
+    } catch (e) {
+      // Fallback to dummy data if server is unreachable
+      print('Failed to fetch from server: $e. Using dummy data fallback.');
+      await Future.delayed(const Duration(milliseconds: 500));
+      return BimbelProgram.dummyPrograms;
     }
-    return items
-        .map(
-          (item) => BimbelProgram.fromJson(
-            Map<String, dynamic>.from(item as Map),
-          ),
-        )
-        .toList(growable: false);
   }
 
   Future<void> submitLead({
