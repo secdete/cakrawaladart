@@ -7,6 +7,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../auth/screens/bimbel_login_screen.dart';
 import '../../student/screens/student_dashboard_screen.dart';
+import '../services/landing_api_service.dart';
+import '../widgets/landing_lead_dialog.dart';
 
 class BimbelLandingScreen extends StatefulWidget {
   const BimbelLandingScreen({super.key});
@@ -16,14 +18,14 @@ class BimbelLandingScreen extends StatefulWidget {
 }
 
 class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
-  String _selectedCategory = 'Semua Jenjang';
+  String _selectedGradeFilter = 'SMA - Kelas 12';
+  final _api = LandingApiService();
+  late Future<List<BimbelProgram>> _programsFuture;
   final _aboutSectionKey = GlobalKey();
   final _programsSectionKey = GlobalKey();
   final _contactSectionKey = GlobalKey();
 
-  void _scrollToAbout() {
-    _scrollTo(_aboutSectionKey);
-  }
+  void _scrollToAbout() => _scrollTo(_aboutSectionKey);
 
   void _scrollTo(GlobalKey key) {
     final sectionContext = key.currentContext;
@@ -32,6 +34,44 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
       sectionContext,
       duration: const Duration(milliseconds: 450),
       curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrograms();
+  }
+
+  void _loadPrograms() {
+    _programsFuture = _api.fetchPrograms(_selectedGradeFilter);
+  }
+
+  void _onGradeFilterChanged(String grade) {
+    setState(() {
+      _selectedGradeFilter = grade;
+      _loadPrograms();
+    });
+  }
+
+  Future<void> _showLeadDialog({
+    required String source,
+    BimbelProgram? program,
+  }) async {
+    final submitted = await showDialog<bool>(
+      context: context,
+      builder: (context) => LandingLeadDialog(
+        source: source,
+        grade: _selectedGradeFilter,
+        program: program,
+      ),
+    );
+    if (!mounted || submitted != true) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Permintaan terkirim. Tim Cakrawala akan menghubungi kamu.'),
+        backgroundColor: AppColors.accentGreenDark,
+      ),
     );
   }
 
@@ -119,8 +159,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           children: [
             _buildHeroBanner(context, isDesktop),
             _buildKeyMetricsBar(isDesktop),
-            _buildCategoryFilterSection(),
-            _buildProgramsGrid(isDesktop),
+            _buildPopularPackagesSection(isDesktop),
             _buildFeaturesComparison(isDesktop),
             _buildAboutSection(isDesktop),
             _buildTestimonialsSection(isDesktop),
@@ -136,7 +175,9 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: TextButton(
-        onPressed: label == 'Tentang Kami' ? _scrollToAbout : null,
+        onPressed: label == 'Tentang Kami'
+            ? _scrollToAbout
+            : () => _scrollTo(_programsSectionKey),
         child: Text(
           label,
           style: GoogleFonts.plusJakartaSans(
@@ -275,16 +316,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
               ),
             ),
             OutlinedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Menghubungi Tim Konsultan Cakrawala via WhatsApp: +62 812-8899-7700',
-                    ),
-                    backgroundColor: AppColors.accentGreenDark,
-                  ),
-                );
-              },
+              onPressed: () => _showLeadDialog(source: 'hero_consultation'),
               icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
               label: const Text('Konsultasi Gratis via WA'),
               style: OutlinedButton.styleFrom(
@@ -555,275 +587,451 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     );
   }
 
-  Widget _buildCategoryFilterSection() {
+  Widget _buildPopularPackagesSection(bool isDesktop) {
     return Container(
       key: _programsSectionKey,
       width: double.infinity,
       color: const Color(0xFFF7F4FF),
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-      child: Column(
-        children: [
-          Text(
-            'Pilihan Program Belajar Sesuai Kebutuhan',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textHeading,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tersedia mulai dari jenjang anak usia dini hingga persiapan ujian masuk perguruan tinggi negeri',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 20),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: BimbelConstants.gradeCategories.map((cat) {
-                final isSelected = _selectedCategory == cat;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: ChoiceChip(
-                    label: Text(cat),
-                    selected: isSelected,
-                    onSelected: (val) {
-                      setState(() {
-                        _selectedCategory = cat;
-                      });
-                    },
-                    selectedColor: AppColors.primaryBlue,
-                    backgroundColor: Colors.white,
-                    labelStyle: GoogleFonts.plusJakartaSans(
-                      color: isSelected ? Colors.white : AppColors.textBody,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      fontSize: 13,
+      padding: EdgeInsets.symmetric(
+        vertical: 40,
+        horizontal: isDesktop ? 64 : 20,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1280),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Row: ⭐ Paket populer untuk [ Dropdown: SMA - Kelas 12 ∨ ]
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 16,
+                runSpacing: 12,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFFF59E0B),
+                        size: 28,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Paket populer untuk',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: isDesktop ? 26 : 20,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 4,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: isSelected
-                            ? AppColors.primaryBlue
-                            : AppColors.borderMedium,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFCBD5E1)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedGradeFilter,
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Color(0xFF475569),
+                          size: 22,
+                        ),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1E293B),
+                        ),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            _onGradeFilterChanged(newValue);
+                          }
+                        },
+                        items:
+                            <String>[
+                              'SMA - Kelas 12',
+                              'SMA - Kelas 11',
+                              'SMA - Kelas 10',
+                              'SMP - Kelas 9',
+                              'SD - Kelas 6',
+                              'UTBK - SNBT',
+                              'Kedinasan',
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
                       ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+                ],
+              ),
+              const SizedBox(height: 28),
 
-  Widget _buildProgramsGrid(bool isDesktop) {
-    final programs = BimbelProgram.dummyPrograms;
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isDesktop ? 2 : 1,
-              mainAxisSpacing: 24,
-              crossAxisSpacing: 24,
-              childAspectRatio: isDesktop ? 1.45 : 1.05,
-            ),
-            itemCount: programs.length,
-            itemBuilder: (context, index) {
-              return _buildProgramCard(programs[index]);
-            },
+              // Horizontal Scrollable Cards Container
+              SizedBox(
+                height: 405,
+                child: FutureBuilder<List<BimbelProgram>>(
+                  future: _programsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return _buildProgramLoadError();
+                    }
+                    final programs = snapshot.data ?? const <BimbelProgram>[];
+                    if (programs.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'Belum ada paket untuk jenjang ini.',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: programs.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 16),
+                      itemBuilder: (context, index) => SizedBox(
+                        width: 285,
+                        child: _buildRuangguruStyleCard(programs[index]),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildProgramCard(BimbelProgram program) {
+  Widget _buildProgramLoadError() => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.cloud_off_rounded, color: AppColors.textSecondary),
+        const SizedBox(height: 8),
+        Text(
+          'Katalog belum tersambung ke server.',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        TextButton.icon(
+          onPressed: () => setState(_loadPrograms),
+          icon: const Icon(Icons.refresh_rounded, size: 16),
+          label: const Text('Coba lagi'),
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildRuangguruStyleCard(BimbelProgram program) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: program.isPopular
-              ? AppColors.primaryBlue.withValues(alpha: 0.4)
-              : AppColors.borderSubtle,
-          width: program.isPopular ? 1.5 : 1,
-        ),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Neutral Header Section (Clean white, no colored background)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            color: Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: program.isPopular
-                        ? const Color(0xFFFEF3C7)
-                        : AppColors.bgSubtle,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    program.badgeText,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: program.isPopular
-                          ? const Color(0xFFB45309)
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ),
+                // Top Row: Badge + Clean Icon
                 Row(
                   children: [
-                    const Icon(
-                      Icons.star_rounded,
-                      color: Color(0xFFF59E0B),
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${program.rating} (${program.totalReviews})',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              program.badgeIcon,
+                              size: 13,
+                              color: const Color(0xFF1D4ED8),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                program.badgeText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1D4ED8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    _buildCleanCardIcon(program.illustrationType),
                   ],
+                ),
+                const SizedBox(height: 14),
+
+                // Category Tag
+                Text(
+                  program.categoryTag,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // Title
+                Text(
+                  program.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF0F172A),
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              program.title,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textHeading,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              program.gradeLevel,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.accentCyan,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              program.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                color: AppColors.textBody,
-                height: 1.45,
-              ),
-            ),
-            const Spacer(),
-            const Divider(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
+          ),
+
+          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+
+          // Bottom Section - Price and Action
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Investasi Belajar',
+                        program.packageSubtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF64748B),
                         ),
                       ),
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
+                      if (program.packageDetail != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          program.packageDetail!,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 10),
+
+                      if (program.originalPriceFormatted != null) ...[
+                        Row(
+                          children: [
+                            Text(
+                              program.originalPriceFormatted!,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF94A3B8),
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            if (program.discountPercentage != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEE2E2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  program.discountPercentage!,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFFDC2626),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                      ],
+
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
                         children: [
-                          Text(
-                            program.priceFormatted,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primaryBlue,
+                          Flexible(
+                            child: Text(
+                              program.priceFormatted,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF0F172A),
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            program.periodFormatted,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
+                          if (program.periodFormatted.isNotEmpty) ...[
+                            const SizedBox(width: 2),
+                            Flexible(
+                              child: Text(
+                                program.periodFormatted,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF64748B),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BimbelLoginScreen(),
+
+                  // Orange Beli Paket Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 42,
+                    child: ElevatedButton(
+                      onPressed: () => _showLeadDialog(
+                        source: 'package_interest',
+                        program: program,
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(
-                    'Pilih Program',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF6B00),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: Text(
+                        'Beli Paket',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildCleanCardIcon(String type) {
+    IconData icon;
+    Color iconColor;
+
+    switch (type) {
+      case 'snbt':
+        icon = Icons.auto_stories_rounded;
+        iconColor = const Color(0xFF2563EB);
+        break;
+      case 'privat':
+        icon = Icons.person_search_rounded;
+        iconColor = const Color(0xFF059669);
+        break;
+      case 'english':
+        icon = Icons.language_rounded;
+        iconColor = const Color(0xFF7C3AED);
+        break;
+      case 'liveteaching':
+        icon = Icons.videocam_rounded;
+        iconColor = const Color(0xFFEA580C);
+        break;
+      case 'kedinasan':
+        icon = Icons.local_police_rounded;
+        iconColor = const Color(0xFF1D4ED8);
+        break;
+      default:
+        icon = Icons.school_rounded;
+        iconColor = const Color(0xFF475569);
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Icon(icon, size: 20, color: iconColor),
     );
   }
 
@@ -1278,16 +1486,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Menghubungkan ke WhatsApp Konsultan Pendidikan: 0812-8899-7700',
-                  ),
-                  backgroundColor: AppColors.accentGreenDark,
-                ),
-              );
-            },
+            onPressed: () => _showLeadDialog(source: 'landing_consultation'),
             icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
             label: const Text('Hubungi Konsultan Pendidikan (WhatsApp)'),
             style: ElevatedButton.styleFrom(
