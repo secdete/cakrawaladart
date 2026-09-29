@@ -168,6 +168,25 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final url = Uri.parse(
+            'https://wa.me/6281324868790?text=${Uri.encodeComponent('Halo Tim Cakrawala, saya ingin berkonsultasi mengenai bimbingan belajar.')}',
+          );
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
+          }
+        },
+        backgroundColor: const Color(0xFF25D366), // WhatsApp Green
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.chat_rounded),
+        label: Text(
+          'Chat Kami',
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
     );
   }
 
@@ -688,7 +707,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
 
               // Horizontal Scrollable Cards Container
               SizedBox(
-                height: 405,
+                height: 565,
                 child: FutureBuilder<List<BimbelProgram>>(
                   future: _programsFuture,
                   builder: (context, snapshot) {
@@ -770,6 +789,27 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Image Section
+          Image.asset(
+            program.imageAsset,
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                height: 160,
+                width: double.infinity,
+                color: program.cardBgColor,
+                child: Center(
+                  child: Icon(
+                    program.badgeIcon,
+                    size: 48,
+                    color: program.badgeBgColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              );
+            },
+          ),
           // Top Neutral Header Section (Clean white, no colored background)
           Container(
             width: double.infinity,
