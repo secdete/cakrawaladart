@@ -69,22 +69,12 @@ class _AuthCardState extends State<AuthCard> {
       _errorMessage = null;
     });
 
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     final id = _idController.text.trim();
-    final password = _passwordController.text.trim();
-
-    if (id.isEmpty) {
-      setState(() {
-        _errorMessage = 'Nomor Induk (NIM / NIDN / NIP) wajib diisi.';
-      });
-      return;
-    }
-
-    if (password.isEmpty) {
-      setState(() {
-        _errorMessage = 'Kata sandi wajib diisi.';
-      });
-      return;
-    }
 
     // Verify Captcha
     final captchaVerified = _captchaKey.currentState?.verify() ?? false;
@@ -345,6 +335,12 @@ class _AuthCardState extends State<AuthCard> {
                         hintText: idHint,
                         prefixIcon: const Icon(Icons.badge_outlined, size: 20),
                       ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Nomor Induk wajib diisi.';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
 
@@ -401,6 +397,12 @@ class _AuthCardState extends State<AuthCard> {
                           },
                         ),
                       ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Kata sandi wajib diisi.';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 18),
 
