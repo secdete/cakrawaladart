@@ -1,11 +1,11 @@
 {
-    "name": "cakrawala_educentre",
-    "short_name": "cakrawala_educentre",
+    "name": "Cakrawala Educentre",
+    "short_name": "Cakrawala",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#14213D",
+    "description": "Cakrawala Educentre - Bimbel dan les privat terpadu.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

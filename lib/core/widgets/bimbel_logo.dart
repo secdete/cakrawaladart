@@ -20,50 +20,17 @@ class BimbelLogo extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF2563EB), Color(0xFF0284C7)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        Semantics(
+          image: true,
+          label: 'Logo Cakrawala Educentre',
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(size * 0.24),
+            child: Image.asset(
+              'assets/images/cakrawala_logo.png',
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
             ),
-            borderRadius: BorderRadius.circular(size * 0.28),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF0284C7).withValues(alpha: 0.35),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(
-                Icons.auto_stories_rounded,
-                color: Colors.white,
-                size: size * 0.52,
-              ),
-              Positioned(
-                top: size * 0.12,
-                right: size * 0.15,
-                child: Container(
-                  width: size * 0.22,
-                  height: size * 0.22,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF59E0B),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.star_rounded,
-                    color: Colors.white,
-                    size: size * 0.18,
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
         if (showText) ...[
@@ -85,13 +52,16 @@ class BimbelLogo extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.accentOrange,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'EDU',
+                      'EDUCENTRE',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: size * 0.24,
                         fontWeight: FontWeight.w800,

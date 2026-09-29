@@ -77,11 +77,15 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
         context,
         MaterialPageRoute(builder: (_) => const ParentMonitoringScreen()),
       );
-    } else {
-      // Dashboard tutor belum terpisah; akun demo tutor diarahkan ke ruang belajar.
+    } else if (account['role'] == 'Siswa') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
+      );
+    } else {
+      setState(
+        () => _errorMessage =
+            'Akun tutor dikenali, tetapi dashboard tutor belum tersedia.',
       );
     }
   }

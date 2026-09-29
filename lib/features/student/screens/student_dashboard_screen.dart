@@ -6,7 +6,6 @@ import '../../../core/models/tryout_exam.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../landing/screens/bimbel_landing_screen.dart';
-import '../../parent/screens/parent_monitoring_screen.dart';
 import '../../tryout/screens/tryout_portal_screen.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
@@ -123,28 +122,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         elevation: 0,
         title: const BimbelLogo(size: 34),
         actions: [
-          TextButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ParentMonitoringScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.family_restroom_rounded, size: 18),
-            label: Text(
-              'Mode Orang Tua',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryBlue,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
+            icon: const Icon(
+              Icons.logout_rounded,
+              color: AppColors.textSecondary,
+            ),
             tooltip: 'Keluar ke Beranda',
             onPressed: () {
               Navigator.pushReplacement(
@@ -196,7 +178,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildStudentWelcomeHeader(Map<String, dynamic> student, bool isDesktop) {
+  Widget _buildStudentWelcomeHeader(
+    Map<String, dynamic> student,
+    bool isDesktop,
+  ) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -357,7 +342,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.bookmark_added_rounded, color: Color(0xFFF59E0B), size: 24),
+          const Icon(
+            Icons.bookmark_added_rounded,
+            color: Color(0xFFF59E0B),
+            size: 24,
+          ),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +381,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF93C5FD).withValues(alpha: 0.5)),
+        border: Border.all(
+          color: const Color(0xFF93C5FD).withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -458,7 +449,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.person_outline_rounded, size: 16, color: AppColors.textSecondary),
+              const Icon(
+                Icons.person_outline_rounded,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 6),
               Text(
                 '${session.tutorName} • ${session.tutorTitle}',
@@ -473,7 +468,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.schedule_rounded, size: 16, color: AppColors.textSecondary),
+              const Icon(
+                Icons.schedule_rounded,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 6),
               Text(
                 '${session.dateTimeFormatted} (${session.timeRange})',
@@ -492,7 +491,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Membuka Ruang Belajar Online: ${session.meetLink}'),
+                      content: Text(
+                        'Membuka Ruang Belajar Online: ${session.meetLink}',
+                      ),
                       backgroundColor: AppColors.accentGreenDark,
                     ),
                   );
@@ -512,7 +513,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Mengunduh Modul Ringkasan Rumus Dinamika Rotasi (PDF)'),
+                      content: Text(
+                        'Mengunduh Modul Ringkasan Rumus Dinamika Rotasi (PDF)',
+                      ),
                     ),
                   );
                 },
@@ -584,7 +587,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Membuka Perpustakaan Modul Digital Cakrawala'),
+                      content: Text(
+                        'Membuka Perpustakaan Modul Digital Cakrawala',
+                      ),
                     ),
                   );
                 },
@@ -654,7 +659,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildLearningProgressAndTryouts(BuildContext context, bool isDesktop) {
+  Widget _buildLearningProgressAndTryouts(
+    BuildContext context,
+    bool isDesktop,
+  ) {
     final tryouts = TryoutExam.dummyExams;
 
     return Container(
@@ -777,7 +785,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryBlue,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                       ),
                       child: Text(
                         'Kerjakan',
