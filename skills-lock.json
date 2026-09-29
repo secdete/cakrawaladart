@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "flutter-enterprise": {
+      "source": "ajianaz/skills-collection",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-enterprise/SKILL.md",
+      "computedHash": "a4a608609d900f2d1ff27b5abf649c17351e310f4498abb8250da7868f4c6761"
+    },
+    "flutter-ui-ux": {
+      "source": "ajianaz/skills-collection",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-ui-ux/SKILL.md",
+      "computedHash": "9e74fa709465fa235164ce83b4407708f1fc5205feb0e889495d1e387f544d15"
+    },
+    "mobile-devops": {
+      "source": "ajianaz/skills-collection",
+      "sourceType": "github",
+      "skillPath": "skills/mobile-devops/SKILL.md",
+      "computedHash": "25acb3904cc7d8a191c8c2142232bd890fbf873bc33d287880c86ec54e030590"
+    },
+    "product-management": {
+      "source": "ajianaz/skills-collection",
+      "sourceType": "github",
+      "skillPath": "skills/product-management/SKILL.md",
+      "computedHash": "e6bf20127361f867e9c2639553eea0a3a58001da22b116643d00beb297bb0060"
+    },
+    "qa-tester": {
+      "source": "ajianaz/skills-collection",
+      "sourceType": "github",
+      "skillPath": "skills/qa-tester/SKILL.md",
+      "computedHash": "ce82eeecbc546ba1f966ab58339a638a2a510eea8a2ba91517b7d172666399a9"
+    },
+    "task-planner": {
+      "source": "ajianaz/skills-collection",
+      "sourceType": "github",
+      "skillPath": "skills/task-planner/SKILL.md",
+      "computedHash": "80ee26e75388faebc2a6786442c4ff29ac32294984fdc2463143075139cb4075"
+    }
+  }
+}

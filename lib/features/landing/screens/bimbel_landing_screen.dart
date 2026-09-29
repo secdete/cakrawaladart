@@ -1,0 +1,1124 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../core/constants/bimbel_constants.dart';
+import '../../../core/models/bimbel_program.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/bimbel_logo.dart';
+import '../../auth/screens/bimbel_login_screen.dart';
+import '../../student/screens/student_dashboard_screen.dart';
+
+class BimbelLandingScreen extends StatefulWidget {
+  const BimbelLandingScreen({super.key});
+
+  @override
+  State<BimbelLandingScreen> createState() => _BimbelLandingScreenState();
+}
+
+class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
+  String _selectedCategory = 'Semua Jenjang';
+
+  @override
+  Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width >= 900;
+
+    return Scaffold(
+      backgroundColor: AppColors.bgCanvas,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        titleSpacing: 16,
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: BimbelLogo(size: 34),
+        ),
+        actions: [
+          if (MediaQuery.of(context).size.width >= 1150) ...[
+            _buildNavItem('Program Bimbel'),
+            _buildNavItem('Les Privat'),
+            _buildNavItem('Tryout SNBT'),
+            _buildNavItem('Tentang Kami'),
+            const SizedBox(width: 8),
+          ],
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BimbelLoginScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.login_rounded, size: 16),
+            label: Text(
+              'Masuk',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primaryBlue,
+              side: const BorderSide(color: AppColors.primaryBlue),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const StudentDashboardScreen(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accentOrange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Ruang Belajar',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildHeroBanner(context, isDesktop),
+            _buildKeyMetricsBar(isDesktop),
+            _buildCategoryFilterSection(),
+            _buildProgramsGrid(isDesktop),
+            _buildFeaturesComparison(isDesktop),
+            _buildTestimonialsSection(isDesktop),
+            _buildCtaConsultationSection(context),
+            _buildFooter(isDesktop),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: TextButton(
+        onPressed: () {},
+        child: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textBody,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroBanner(BuildContext context, bool isDesktop) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF0F172A), Color(0xFF1E3A8A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 64 : 20,
+        vertical: isDesktop ? 60 : 36,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: isDesktop
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(child: _buildHeroTextContent(context)),
+                    const SizedBox(width: 48),
+                    Expanded(child: _buildHeroCardPreview()),
+                  ],
+                )
+              : Column(
+                  children: [
+                    _buildHeroTextContent(context),
+                    const SizedBox(height: 32),
+                    _buildHeroCardPreview(),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroTextContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0284C7).withValues(alpha: 0.25),
+            border: Border.all(
+              color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+            ),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.verified_rounded, color: Color(0xFF38BDF8), size: 16),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  'Layanan Resmi Bimbel PT Indo Prestasi Utama',
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: const Color(0xFFE0F2FE),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Belajar Lebih Asyik, Kuasai Konsep & Tembus PTN Impian!',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 34,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            height: 1.25,
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          'Bimbingan belajar dan les privat terpadu untuk jenjang TK, SD, SMP, SMA hingga persiapan intensif UTBK-SNBT. Metode adaptif dengan Master Tutor berpengalaman.',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 15,
+            color: const Color(0xFFCBD5E1),
+            height: 1.6,
+          ),
+        ),
+        const SizedBox(height: 28),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BimbelLoginScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.rocket_launch_rounded, size: 18),
+              label: const Text('Mulai Belajar Sekarang'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accentOrange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                textStyle: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Menghubungi Tim Konsultan Cakrawala via WhatsApp: +62 812-8899-7700',
+                    ),
+                    backgroundColor: AppColors.accentGreenDark,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+              label: const Text('Konsultasi Gratis via WA'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: const BorderSide(color: Color(0xFF64748B)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                textStyle: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeroCardPreview() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.accentCyanLight,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.school_rounded, color: AppColors.accentCyan),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sesi Live Class Hari Ini',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      'Fisika SMA: Dinamika Rotasi',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textHeading,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF16A34A),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'LIVE',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: const Color(0xFF16A34A),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 28),
+          _buildHeroFeatureRow(
+            Icons.person_pin_rounded,
+            'Master Tutor Alumnus PTN Terkemuka (ITB, UI, UGM)',
+          ),
+          const SizedBox(height: 10),
+          _buildHeroFeatureRow(
+            Icons.schedule_rounded,
+            'Jadwal Fleksibel: Guru Datang ke Rumah / Live Zoom',
+          ),
+          const SizedBox(height: 10),
+          _buildHeroFeatureRow(
+            Icons.analytics_rounded,
+            'Simulasi Tryout IRT & Laporan Kemajuan ke Orang Tua',
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.bgSubtle,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tingkat Kepuasan Siswa',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          '4.9 / 5.0 (2.400+ Siswa)',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textHeading,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Garansi Cocok',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroFeatureRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.primaryBlue),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textBody,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKeyMetricsBar(bool isDesktop) {
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Wrap(
+            alignment: WrapAlignment.spaceAround,
+            spacing: 24,
+            runSpacing: 20,
+            children: [
+              _buildMetricItem('15.000+', 'Sesi Les Terselesaikan'),
+              _buildMetricItem('94.8%', 'Siswa Lolos PTN & Sekolah Impian'),
+              _buildMetricItem('350+', 'Master Tutor & Pengajar Tersertifikasi'),
+              _buildMetricItem('4.9 / 5.0', 'Rating Kepuasan Orang Tua & Siswa'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetricItem(String value, String label) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: AppColors.primaryBlue,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryFilterSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      child: Column(
+        children: [
+          Text(
+            'Pilihan Program Belajar Sesuai Kebutuhan',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textHeading,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tersedia mulai dari jenjang anak usia dini hingga persiapan ujian masuk perguruan tinggi negeri',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: BimbelConstants.gradeCategories.map((cat) {
+                final isSelected = _selectedCategory == cat;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ChoiceChip(
+                    label: Text(cat),
+                    selected: isSelected,
+                    onSelected: (val) {
+                      setState(() {
+                        _selectedCategory = cat;
+                      });
+                    },
+                    selectedColor: AppColors.primaryBlue,
+                    backgroundColor: Colors.white,
+                    labelStyle: GoogleFonts.plusJakartaSans(
+                      color: isSelected ? Colors.white : AppColors.textBody,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontSize: 13,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppColors.primaryBlue
+                            : AppColors.borderMedium,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgramsGrid(bool isDesktop) {
+    final programs = BimbelProgram.dummyPrograms;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isDesktop ? 2 : 1,
+              mainAxisSpacing: 24,
+              crossAxisSpacing: 24,
+              childAspectRatio: isDesktop ? 1.45 : 1.05,
+            ),
+            itemCount: programs.length,
+            itemBuilder: (context, index) {
+              return _buildProgramCard(programs[index]);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgramCard(BimbelProgram program) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: program.isPopular
+              ? AppColors.primaryBlue.withValues(alpha: 0.4)
+              : AppColors.borderSubtle,
+          width: program.isPopular ? 1.5 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: program.isPopular
+                        ? const Color(0xFFFEF3C7)
+                        : AppColors.bgSubtle,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    program.badgeText,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: program.isPopular
+                          ? const Color(0xFFB45309)
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${program.rating} (${program.totalReviews})',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              program.title,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textHeading,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              program.gradeLevel,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.accentCyan,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              program.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: AppColors.textBody,
+                height: 1.45,
+              ),
+            ),
+            const Spacer(),
+            const Divider(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Investasi Belajar',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            program.priceFormatted,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primaryBlue,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            program.periodFormatted,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BimbelLoginScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Pilih Program',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturesComparison(bool isDesktop) {
+    return Container(
+      margin: const EdgeInsets.only(top: 48),
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
+      color: Colors.white,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: Column(
+            children: [
+              Text(
+                'Mengapa Ribuan Siswa Memilih Cakrawala Educentre?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textHeading,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Kombinasi pendampingan personal, tutor berkualitas, dan teknologi belajar interaktif',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 36),
+              isDesktop
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _buildValuePropCard(
+                            Icons.psychology_rounded,
+                            'Metode Belajar Personal',
+                            'Setiap anak unik. Materi dan kecepatan belajar disesuaikan dengan daya serap siswa tanpa paksaan.',
+                            AppColors.accentOrange,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: _buildValuePropCard(
+                            Icons.auto_stories_rounded,
+                            'Garansi Cocok Tutor',
+                            'Jika siswa merasa kurang cocok dengan metode mengajar tutor, kami siap mengganti tutor tanpa biaya tambahan.',
+                            AppColors.primaryBlue,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: _buildValuePropCard(
+                            Icons.mark_email_read_rounded,
+                            'Laporan Rapor ke Orang Tua',
+                            'Orang tua mendapat laporan catatan belajar langsung setiap sesi selesai, mencakup pemahaman bab & PR.',
+                            AppColors.accentGreen,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        _buildValuePropCard(
+                          Icons.psychology_rounded,
+                          'Metode Belajar Personal',
+                          'Setiap anak unik. Kecepatan belajar disesuaikan dengan daya serap siswa.',
+                          AppColors.accentOrange,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildValuePropCard(
+                          Icons.auto_stories_rounded,
+                          'Garansi Cocok Tutor',
+                          'Bisa ganti guru jika gaya mengajar kurang cocok kapan saja.',
+                          AppColors.primaryBlue,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildValuePropCard(
+                          Icons.mark_email_read_rounded,
+                          'Laporan Rapor ke Orang Tua',
+                          'Update perkembangan anak dikirim langsung ke WhatsApp setiap selesai sesi.',
+                          AppColors.accentGreen,
+                        ),
+                      ],
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildValuePropCard(
+    IconData icon,
+    String title,
+    String desc,
+    Color accentColor,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: AppColors.bgCanvas,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: accentColor, size: 24),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textHeading,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            desc,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: AppColors.textBody,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestimonialsSection(bool isDesktop) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: Column(
+            children: [
+              Text(
+                'Kisah Sukses Siswa Cakrawala Educentre',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textHeading,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Dari nilai rapor yang naik drastis hingga tembus kampus impian se-Indonesia',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 32),
+              isDesktop
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: _buildTestimonialItem(
+                            'Farhan Arya Nugraha',
+                            'Lolos STEI ITB 2025',
+                            '"Belajar di Cakrawala bikin materi fisika yang rumit jadi masuk akal banget. Soal tryout IRT-nya persis banget sama pola SNBT!"',
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: _buildTestimonialItem(
+                            'Nadia Safira & Ibu Hendrawan',
+                            'Siswa SMP Kelas 8 & Wali Murid',
+                            '"Tutor les privatnya sabar banget datang ke rumah. Nadia yang tadinya takut matematika sekarang malah jadi juara kelas!"',
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        _buildTestimonialItem(
+                          'Farhan Arya Nugraha',
+                          'Lolos STEI ITB 2025',
+                          '"Materi fisika jadi mudah dipahami, tryout IRT-nya sangat mirip dengan ujian aslinya!"',
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTestimonialItem(
+                          'Nadia Safira & Ibu Hendrawan',
+                          'Siswa SMP Kelas 8 & Wali Murid',
+                          '"Tutor datang ke rumah tepat waktu dan cara ngajarnya ramah. Nilai raport anak naik pesat!"',
+                        ),
+                      ],
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTestimonialItem(String name, String role, String quote) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: List.generate(
+              5,
+              (index) => const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 18),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            quote,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontStyle: FontStyle.italic,
+              color: AppColors.textBody,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            name,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textHeading,
+            ),
+          ),
+          Text(
+            role,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              color: AppColors.accentCyan,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCtaConsultationSection(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: AppColors.brandNavy,
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      child: Column(
+        children: [
+          Text(
+            'Ingin Konsultasi Jadwal atau Pilihan Tutor?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Text(
+              'Tim Education Consultant Cakrawala siap membantu menentukan paket dan tutor terbaik yang sesuai dengan kebutuhan dan target anak Anda.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                color: const Color(0xFFCBD5E1),
+                height: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Menghubungkan ke WhatsApp Konsultan Pendidikan: 0812-8899-7700',
+                  ),
+                  backgroundColor: AppColors.accentGreenDark,
+                ),
+              );
+            },
+            icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
+            label: const Text('Hubungi Konsultan Pendidikan (WhatsApp)'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accentGreen,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              textStyle: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter(bool isDesktop) {
+    return Container(
+      color: const Color(0xFF070C18),
+      padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const BimbelLogo(size: 32, isLightMode: false),
+                  Text(
+                    BimbelConstants.companyName,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      color: const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(color: Color(0xFF1E293B), height: 36),
+              Text(
+                'Â© 2026 Cakrawala Educentre (PT Indo Prestasi Utama). All rights reserved.\nKantor Operasional: Mustika Jaya, Kota Bekasi & Layanan Seluruh Indonesia.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: const Color(0xFF64748B),
+                  height: 1.6,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
