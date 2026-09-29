@@ -606,7 +606,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
 
               // Horizontal Scrollable Cards Container
               SizedBox(
-                height: 405,
+                height: 565,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
@@ -645,6 +645,27 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Image Section
+          Image.asset(
+            program.imageAsset,
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                height: 160,
+                width: double.infinity,
+                color: program.cardBgColor,
+                child: Center(
+                  child: Icon(
+                    program.badgeIcon,
+                    size: 48,
+                    color: program.badgeBgColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              );
+            },
+          ),
           // Top Neutral Header Section (Clean white, no colored background)
           Container(
             width: double.infinity,
