@@ -47,6 +47,48 @@ class BimbelProgram {
     required this.imageAsset,
   });
 
+  factory BimbelProgram.fromJson(Map<String, dynamic> json) {
+    Color parseColor(dynamic value, Color fallback) {
+      if (value is! String) return fallback;
+      final hex = value.replaceFirst('#', '');
+      final parsed = int.tryParse(hex, radix: 16);
+      if (parsed == null) return fallback;
+      return Color(hex.length == 6 ? 0xFF000000 | parsed : parsed);
+    }
+
+    IconData parseIcon(dynamic value) => switch (value) {
+      'calendar_month_rounded' => Icons.calendar_month_rounded,
+      'thumb_up_alt_rounded' => Icons.thumb_up_alt_rounded,
+      'card_membership_rounded' => Icons.card_membership_rounded,
+      'co_present_rounded' => Icons.co_present_rounded,
+      'account_balance_rounded' => Icons.account_balance_rounded,
+      _ => Icons.school_rounded,
+    };
+
+    return BimbelProgram(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      categoryTag: json['categoryTag'] as String? ?? '',
+      gradeLevel: json['gradeLevel'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      badgeText: json['badgeText'] as String? ?? '',
+      badgeIcon: parseIcon(json['badgeIcon']),
+      priceFormatted: json['priceFormatted'] as String? ?? '',
+      originalPriceFormatted: json['originalPriceFormatted'] as String?,
+      discountPercentage: json['discountPercentage'] as String?,
+      periodFormatted: json['periodFormatted'] as String? ?? '',
+      packageSubtitle: json['packageSubtitle'] as String? ?? '',
+      packageDetail: json['packageDetail'] as String?,
+      cardBgColor: parseColor(json['cardBgColor'], const Color(0xFFF8FAFC)),
+      badgeBgColor: parseColor(json['badgeBgColor'], const Color(0xFF2563EB)),
+      rating: (json['rating'] as num?)?.toDouble() ?? 0,
+      totalReviews: (json['totalReviews'] as num?)?.toInt() ?? 0,
+      features: (json['features'] as List<dynamic>? ?? const []).cast<String>(),
+      isPopular: json['isPopular'] as bool? ?? false,
+      illustrationType: json['illustrationType'] as String? ?? 'default',
+    );
+  }
+
   static List<BimbelProgram> get dummyPrograms => [
         const BimbelProgram(
           id: 'prog-snbt-1',

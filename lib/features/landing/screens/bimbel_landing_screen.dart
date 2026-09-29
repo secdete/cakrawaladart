@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/bimbel_constants.dart';
 import '../../../core/models/bimbel_program.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../auth/screens/bimbel_login_screen.dart';
 import '../../student/screens/student_dashboard_screen.dart';
+import '../services/landing_api_service.dart';
+import '../widgets/landing_lead_dialog.dart';
 
 class BimbelLandingScreen extends StatefulWidget {
   const BimbelLandingScreen({super.key});
@@ -16,6 +19,61 @@ class BimbelLandingScreen extends StatefulWidget {
 
 class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
   String _selectedGradeFilter = 'SMA - Kelas 12';
+  final _api = LandingApiService();
+  late Future<List<BimbelProgram>> _programsFuture;
+  final _aboutSectionKey = GlobalKey();
+  final _programsSectionKey = GlobalKey();
+  final _contactSectionKey = GlobalKey();
+
+  void _scrollToAbout() => _scrollTo(_aboutSectionKey);
+
+  void _scrollTo(GlobalKey key) {
+    final sectionContext = key.currentContext;
+    if (sectionContext == null) return;
+    Scrollable.ensureVisible(
+      sectionContext,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrograms();
+  }
+
+  void _loadPrograms() {
+    _programsFuture = _api.fetchPrograms(_selectedGradeFilter);
+  }
+
+  void _onGradeFilterChanged(String grade) {
+    setState(() {
+      _selectedGradeFilter = grade;
+      _loadPrograms();
+    });
+  }
+
+  Future<void> _showLeadDialog({
+    required String source,
+    BimbelProgram? program,
+  }) async {
+    final submitted = await showDialog<bool>(
+      context: context,
+      builder: (context) => LandingLeadDialog(
+        source: source,
+        grade: _selectedGradeFilter,
+        program: program,
+      ),
+    );
+    if (!mounted || submitted != true) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Permintaan terkirim. Tim Cakrawala akan menghubungi kamu.'),
+        backgroundColor: AppColors.accentGreenDark,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +161,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             _buildKeyMetricsBar(isDesktop),
             _buildPopularPackagesSection(isDesktop),
             _buildFeaturesComparison(isDesktop),
+            _buildAboutSection(isDesktop),
             _buildTestimonialsSection(isDesktop),
             _buildCtaConsultationSection(context),
             _buildFooter(isDesktop),
@@ -116,7 +175,9 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: TextButton(
-        onPressed: () {},
+        onPressed: label == 'Tentang Kami'
+            ? _scrollToAbout
+            : () => _scrollTo(_programsSectionKey),
         child: Text(
           label,
           style: GoogleFonts.plusJakartaSans(
@@ -183,7 +244,11 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.verified_rounded, color: Color(0xFF38BDF8), size: 16),
+              const Icon(
+                Icons.verified_rounded,
+                color: Color(0xFF38BDF8),
+                size: 16,
+              ),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
@@ -237,7 +302,10 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accentOrange,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 textStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -248,22 +316,16 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
               ),
             ),
             OutlinedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Menghubungi Tim Konsultan Cakrawala via WhatsApp: +62 812-8899-7700',
-                    ),
-                    backgroundColor: AppColors.accentGreenDark,
-                  ),
-                );
-              },
+              onPressed: () => _showLeadDialog(source: 'hero_consultation'),
               icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
               label: const Text('Konsultasi Gratis via WA'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.white,
                 side: const BorderSide(color: Color(0xFF64748B)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 textStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -304,7 +366,10 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                   color: AppColors.accentCyanLight,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.school_rounded, color: AppColors.accentCyan),
+                child: const Icon(
+                  Icons.school_rounded,
+                  color: AppColors.accentCyan,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -331,7 +396,10 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFDCFCE7),
                   borderRadius: BorderRadius.circular(20),
@@ -402,7 +470,11 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 18),
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Color(0xFFF59E0B),
+                          size: 18,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '4.9 / 5.0 (2.400+ Siswa)',
@@ -417,7 +489,10 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -461,7 +536,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
   Widget _buildKeyMetricsBar(bool isDesktop) {
     return Container(
       width: double.infinity,
-      color: Colors.white,
+      color: const Color(0xFFEEF4FF),
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       child: Center(
         child: ConstrainedBox(
@@ -473,8 +548,14 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             children: [
               _buildMetricItem('15.000+', 'Sesi Les Terselesaikan'),
               _buildMetricItem('94.8%', 'Siswa Lolos PTN & Sekolah Impian'),
-              _buildMetricItem('350+', 'Master Tutor & Pengajar Tersertifikasi'),
-              _buildMetricItem('4.9 / 5.0', 'Rating Kepuasan Orang Tua & Siswa'),
+              _buildMetricItem(
+                '350+',
+                'Master Tutor & Pengajar Tersertifikasi',
+              ),
+              _buildMetricItem(
+                '4.9 / 5.0',
+                'Rating Kepuasan Orang Tua & Siswa',
+              ),
             ],
           ),
         ),
@@ -507,11 +588,10 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
   }
 
   Widget _buildPopularPackagesSection(bool isDesktop) {
-    final programs = BimbelProgram.dummyPrograms;
-
     return Container(
+      key: _programsSectionKey,
       width: double.infinity,
-      color: const Color(0xFFF8FAFC),
+      color: const Color(0xFFF7F4FF),
       padding: EdgeInsets.symmetric(
         vertical: 40,
         horizontal: isDesktop ? 64 : 20,
@@ -550,7 +630,10 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
@@ -578,25 +661,24 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                         ),
                         onChanged: (String? newValue) {
                           if (newValue != null) {
-                            setState(() {
-                              _selectedGradeFilter = newValue;
-                            });
+                            _onGradeFilterChanged(newValue);
                           }
                         },
-                        items: <String>[
-                          'SMA - Kelas 12',
-                          'SMA - Kelas 11',
-                          'SMA - Kelas 10',
-                          'SMP - Kelas 9',
-                          'SD - Kelas 6',
-                          'UTBK - SNBT',
-                          'Kedinasan',
-                        ].map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                        items:
+                            <String>[
+                              'SMA - Kelas 12',
+                              'SMA - Kelas 11',
+                              'SMA - Kelas 10',
+                              'SMP - Kelas 9',
+                              'SD - Kelas 6',
+                              'UTBK - SNBT',
+                              'Kedinasan',
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
                       ),
                     ),
                   ),
@@ -607,15 +689,36 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
               // Horizontal Scrollable Cards Container
               SizedBox(
                 height: 565,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: programs.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 16),
-                  itemBuilder: (context, index) {
-                    return SizedBox(
-                      width: 285,
-                      child: _buildRuangguruStyleCard(programs[index]),
+                child: FutureBuilder<List<BimbelProgram>>(
+                  future: _programsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return _buildProgramLoadError();
+                    }
+                    final programs = snapshot.data ?? const <BimbelProgram>[];
+                    if (programs.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'Belum ada paket untuk jenjang ini.',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: programs.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 16),
+                      itemBuilder: (context, index) => SizedBox(
+                        width: 285,
+                        child: _buildRuangguruStyleCard(programs[index]),
+                      ),
                     );
                   },
                 ),
@@ -626,6 +729,28 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
       ),
     );
   }
+
+  Widget _buildProgramLoadError() => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.cloud_off_rounded, color: AppColors.textSecondary),
+        const SizedBox(height: 8),
+        Text(
+          'Katalog belum tersambung ke server.',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        TextButton.icon(
+          onPressed: () => setState(_loadPrograms),
+          icon: const Icon(Icons.refresh_rounded, size: 16),
+          label: const Text('Coba lagi'),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildRuangguruStyleCard(BimbelProgram program) {
     return Container(
@@ -676,35 +801,43 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
               children: [
                 // Top Row: Badge + Clean Icon
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFBFDBFE)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            program.badgeIcon,
-                            size: 13,
-                            color: const Color(0xFF1D4ED8),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            program.badgeText,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              program.badgeIcon,
+                              size: 13,
                               color: const Color(0xFF1D4ED8),
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                program.badgeText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1D4ED8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 10),
                     _buildCleanCardIcon(program.illustrationType),
                   ],
                 ),
@@ -788,7 +921,10 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                             const SizedBox(width: 6),
                             if (program.discountPercentage != null)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 1,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFEE2E2),
                                   borderRadius: BorderRadius.circular(4),
@@ -811,22 +947,30 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
-                          Text(
-                            program.priceFormatted,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF0F172A),
+                          Flexible(
+                            child: Text(
+                              program.priceFormatted,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF0F172A),
+                              ),
                             ),
                           ),
                           if (program.periodFormatted.isNotEmpty) ...[
                             const SizedBox(width: 2),
-                            Text(
-                              program.periodFormatted,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF64748B),
+                            Flexible(
+                              child: Text(
+                                program.periodFormatted,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF64748B),
+                                ),
                               ),
                             ),
                           ],
@@ -840,14 +984,10 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                     width: double.infinity,
                     height: 42,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const BimbelLoginScreen(),
-                          ),
-                        );
-                      },
+                      onPressed: () => _showLeadDialog(
+                        source: 'package_interest',
+                        program: program,
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF6B00),
                         foregroundColor: Colors.white,
@@ -920,7 +1060,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     return Container(
       margin: const EdgeInsets.only(top: 48),
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
-      color: Colors.white,
+      color: const Color(0xFFFFF8EE),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),
@@ -1055,8 +1195,166 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     );
   }
 
+  Widget _buildAboutSection(bool isDesktop) {
+    final mapUrl = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(BimbelConstants.operationalHeadquarters)}',
+    );
+
+    return Container(
+      key: _aboutSectionKey,
+      width: double.infinity,
+      color: const Color(0xFFF8F6FF),
+      padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 24),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tentang Kami',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textHeading,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '${BimbelConstants.appName} adalah layanan bimbingan belajar dan les privat dari ${BimbelConstants.companyName}. Kami mendampingi siswa dari jenjang TK hingga persiapan UTBK melalui kelas privat, kelas kelompok, dan pendampingan belajar yang terarah.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  height: 1.7,
+                  color: AppColors.textBody,
+                ),
+              ),
+              const SizedBox(height: 28),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: AppColors.bgCanvas,
+                  border: Border.all(color: AppColors.borderSubtle),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: isDesktop
+                    ? Row(
+                        children: [
+                          Expanded(child: _buildLocationDetails(mapUrl)),
+                          const SizedBox(width: 24),
+                          Expanded(child: _buildMapPreview(mapUrl)),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLocationDetails(mapUrl),
+                          const SizedBox(height: 20),
+                          _buildMapPreview(mapUrl),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationDetails(Uri mapUrl) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(
+          Icons.location_on_rounded,
+          color: AppColors.accentOrange,
+          size: 28,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Kantor Operasional',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textHeading,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          BimbelConstants.operationalHeadquarters,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            height: 1.5,
+            color: AppColors.textBody,
+          ),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: () =>
+              launchUrl(mapUrl, mode: LaunchMode.externalApplication),
+          icon: const Icon(Icons.map_outlined, size: 18),
+          label: const Text('Buka lokasi di Google Maps'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMapPreview(Uri mapUrl) {
+    return InkWell(
+      onTap: () => launchUrl(mapUrl, mode: LaunchMode.externalApplication),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        height: 210,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE2E8F0),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.borderMedium),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: CustomPaint(painter: _MapGridPainter()),
+              ),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.location_pin,
+                  size: 48,
+                  color: AppColors.accentOrangeDark,
+                ),
+                Text(
+                  'Mustika Jaya, Bekasi',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textHeading,
+                  ),
+                ),
+                Text(
+                  'Ketuk untuk melihat pencarian peta',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: AppColors.textBody,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTestimonialsSection(bool isDesktop) {
     return Container(
+      width: double.infinity,
+      color: const Color(0xFFF1F5FF),
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
       child: Center(
         child: ConstrainedBox(
@@ -1138,7 +1436,11 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           Row(
             children: List.generate(
               5,
-              (index) => const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 18),
+              (index) => const Icon(
+                Icons.star_rounded,
+                color: Color(0xFFF59E0B),
+                size: 18,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -1175,6 +1477,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
 
   Widget _buildCtaConsultationSection(BuildContext context) {
     return Container(
+      key: _contactSectionKey,
       width: double.infinity,
       color: AppColors.brandNavy,
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
@@ -1204,16 +1507,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Menghubungkan ke WhatsApp Konsultan Pendidikan: 0812-8899-7700',
-                  ),
-                  backgroundColor: AppColors.accentGreenDark,
-                ),
-              );
-            },
+            onPressed: () => _showLeadDialog(source: 'landing_consultation'),
             icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
             label: const Text('Hubungi Konsultan Pendidikan (WhatsApp)'),
             style: ElevatedButton.styleFrom(
@@ -1235,35 +1529,84 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
   }
 
   Widget _buildFooter(bool isDesktop) {
+    final mapUrl = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(BimbelConstants.operationalHeadquarters)}',
+    );
+
     return Container(
-      color: const Color(0xFF070C18),
-      padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF2F0FF),
+        border: Border(top: BorderSide(color: Color(0xFFE3E0FA))),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 44, 24, 20),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1100),
+          constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const BimbelLogo(size: 32, isLightMode: false),
-                  Text(
-                    BimbelConstants.companyName,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      color: const Color(0xFF94A3B8),
+              if (isDesktop)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 13, child: _buildFooterBrand()),
+                    const SizedBox(width: 28),
+                    Expanded(
+                      flex: 9,
+                      child: _buildFooterList('Wilayah Les Privat', [
+                        'Mustika Jaya, Kota Bekasi',
+                        'Tutor datang ke rumah siswa',
+                        'Les privat secara online',
+                        'Kelas online seluruh Indonesia',
+                      ]),
                     ),
-                  ),
-                ],
-              ),
-              const Divider(color: Color(0xFF1E293B), height: 36),
+                    const SizedBox(width: 28),
+                    Expanded(
+                      flex: 9,
+                      child: _buildFooterList('Layanan', [
+                        'Les Privat 1-on-1',
+                        'Kelas Kelompok',
+                        'Program UTBK-SNBT',
+                        'TK, SD, SMP & SMA',
+                      ]),
+                    ),
+                    const SizedBox(width: 28),
+                    Expanded(flex: 11, child: _buildFooterLinks(mapUrl)),
+                  ],
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildFooterBrand(),
+                    const SizedBox(height: 28),
+                    _buildFooterList('Wilayah Les Privat', [
+                      'Mustika Jaya, Kota Bekasi',
+                      'Tutor datang ke rumah siswa',
+                      'Les privat secara online',
+                      'Kelas online seluruh Indonesia',
+                    ]),
+                    const SizedBox(height: 24),
+                    _buildFooterList('Layanan', [
+                      'Les Privat 1-on-1',
+                      'Kelas Kelompok',
+                      'Program UTBK-SNBT',
+                      'TK, SD, SMP & SMA',
+                    ]),
+                    const SizedBox(height: 24),
+                    _buildFooterLinks(mapUrl),
+                  ],
+                ),
+              const SizedBox(height: 32),
+              const Divider(color: Color(0xFFD9D6EE), height: 1),
+              const SizedBox(height: 16),
               Text(
-                'Â© 2026 Cakrawala Educentre (PT Indo Prestasi Utama). All rights reserved.\nKantor Operasional: Mustika Jaya, Kota Bekasi & Layanan Seluruh Indonesia.',
-                textAlign: TextAlign.center,
+                '© 2026 ${BimbelConstants.appName} · ${BimbelConstants.companyName}',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
-                  color: const Color(0xFF64748B),
-                  height: 1.6,
+                  color: const Color(0xFF68708A),
+                  height: 1.5,
                 ),
               ),
             ],
@@ -1272,5 +1615,211 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
       ),
     );
   }
+
+  Widget _buildFooterBrand() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const BimbelLogo(size: 38),
+        const SizedBox(height: 12),
+        Text(
+          'Pendamping belajar personal untuk membantu siswa tumbuh dan meraih target akademiknya.',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            color: const Color(0xFF555E78),
+            height: 1.6,
+          ),
+        ),
+        const SizedBox(height: 14),
+        _buildFooterContactRow(
+          Icons.location_on_outlined,
+          BimbelConstants.operationalHeadquarters,
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () =>
+              launchUrl(Uri(scheme: 'tel', path: BimbelConstants.contactPhone)),
+          child: _buildFooterContactRow(
+            Icons.phone_outlined,
+            BimbelConstants.contactPhone,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () => launchUrl(
+            Uri(scheme: 'mailto', path: BimbelConstants.contactEmail),
+          ),
+          child: _buildFooterContactRow(
+            Icons.email_outlined,
+            BimbelConstants.contactEmail,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFooterList(String title, List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFooterHeading(title),
+        const SizedBox(height: 12),
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 9),
+            child: Text(
+              item,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: const Color(0xFF555E78),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFooterLinks(Uri mapUrl) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFooterHeading('Tentang Kami'),
+        const SizedBox(height: 8),
+        _buildFooterAction('Profil Cakrawala', _scrollToAbout),
+        _buildFooterAction(
+          'Program Belajar',
+          () => _scrollTo(_programsSectionKey),
+        ),
+        _buildFooterAction('Hubungi Kami', () => _scrollTo(_contactSectionKey)),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () => launchUrl(mapUrl, mode: LaunchMode.externalApplication),
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            height: 112,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE4EAF4),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFD5DCEC)),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: CustomPaint(painter: _MapGridPainter()),
+                  ),
+                ),
+                const Icon(
+                  Icons.location_pin,
+                  color: AppColors.accentOrangeDark,
+                  size: 34,
+                ),
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Lihat di Google Maps',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFooterHeading(String text) => Text(
+    text,
+    style: GoogleFonts.plusJakartaSans(
+      fontSize: 13,
+      fontWeight: FontWeight.w800,
+      color: AppColors.textHeading,
+    ),
+  );
+
+  Widget _buildFooterAction(String label, VoidCallback onPressed) => Align(
+    alignment: Alignment.centerLeft,
+    child: TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: const Color(0xFF555E78),
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 12)),
+    ),
+  );
+
+  Widget _buildFooterContactRow(IconData icon, String text) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(icon, size: 15, color: AppColors.primaryBlue),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(
+          text,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            color: const Color(0xFF555E78),
+            height: 1.4,
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
+class _MapGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final roadPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.9)
+      ..strokeWidth = 12
+      ..style = PaintingStyle.stroke;
+    final minorRoadPaint = Paint()
+      ..color = const Color(0xFFCBD5E1)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final roads = [
+      Path()
+        ..moveTo(0, size.height * .25)
+        ..lineTo(size.width, size.height * .72),
+      Path()
+        ..moveTo(size.width * .12, 0)
+        ..lineTo(size.width * .64, size.height),
+      Path()
+        ..moveTo(size.width, size.height * .18)
+        ..lineTo(size.width * .35, size.height),
+    ];
+    for (final road in roads) {
+      canvas.drawPath(road, roadPaint);
+      canvas.drawPath(road, minorRoadPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
