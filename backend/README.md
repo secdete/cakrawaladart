@@ -27,6 +27,22 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/
 
 Untuk HP fisik, gunakan IP LAN komputer sebagai `API_BASE_URL` (contoh `http://192.168.1.20:8000/api/`) dan jalankan backend dengan `HOST=0.0.0.0`. Izin HTTP tanpa TLS hanya aktif untuk Android debug; rilis produksi harus menggunakan HTTPS.
 
+## Akses cepat satu Wi-Fi
+
+Jalankan satu perintah dari root proyek:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-lan.ps1
+```
+
+Script akan membangun Flutter Web, menjalankan API SQLite, lalu menampilkan URL seperti `http://192.168.1.20:8080`. Buka URL tersebut dari laptop atau HP teman yang terhubung ke Wi-Fi yang sama. Saat Windows Firewall meminta izin, izinkan untuk jaringan private.
+
+Jika alamat jaringan otomatis tidak tepat atau port sedang dipakai, tentukan sendiri:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-lan.ps1 -IpAddress 192.168.1.20 -ApiPort 8001 -WebPort 8081
+```
+
 ## Endpoint
 
 - `GET /api/health` — status API.
