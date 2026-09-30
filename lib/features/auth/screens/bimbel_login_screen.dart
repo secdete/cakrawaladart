@@ -19,9 +19,12 @@ class BimbelLoginScreen extends StatefulWidget {
 
 class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isRegistering = false;
   String? _errorMessage;
   bool _isLoading = false;
 
@@ -49,9 +52,11 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.removeListener(_onEmailChanged);
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -75,38 +80,33 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
       _errorMessage = null;
     });
     try {
+      if (_isRegistering) {
+        await PortalApiService.instance.registerStudent(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
       final user = await PortalApiService.instance.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
       if (!mounted) return;
-      final role = user['role'];
-      await PortalApiService.instance.dashboard(role as String);
-      if (!mounted) return;
-      if (role == 'parent') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const ParentMonitoringScreen()),
-        );
-      } else if (role == 'student') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
-        );
-      } else if (role == 'tutor') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const TutorDashboardScreen()),
-        );
-      } else if (role == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
-        );
-      } else {
+      final role = user['role'] as String?;
+      if (!['parent', 'student', 'tutor', 'admin'].contains(role)) {
         await PortalApiService.instance.logout();
         setState(() => _errorMessage = 'Role akun belum memiliki dashboard.');
+        return;
       }
+      await PortalApiService.instance.dashboard(role!);
+      if (!mounted) return;
+      final Widget destination = switch (role) {
+        'parent' => const ParentMonitoringScreen(),
+        'student' => const StudentDashboardScreen(),
+        'tutor' => const TutorDashboardScreen(),
+        _ => const AdminDashboardScreen(),
+      };
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => destination));
     } catch (e) {
       if (mounted) {
         setState(
@@ -259,7 +259,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Masuk ke Ruang Belajar',
+              _isRegistering ? 'Buat Akun Siswa' : 'Masuk ke Ruang Belajar',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 25,
                 fontWeight: FontWeight.w800,
@@ -268,13 +268,27 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
             ),
             const SizedBox(height: 7),
             Text(
-              'Gunakan email akun Cakrawala yang terdaftar.',
+              _isRegistering
+                  ? 'Daftar untuk mulai menggunakan ruang belajar Cakrawala.'
+                  : 'Gunakan email akun Cakrawala yang terdaftar.',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 color: const Color(0xFF71819B),
               ),
             ),
             const SizedBox(height: 26),
+            if (_isRegistering) ...[
+              _fieldLabel('Nama lengkap'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _nameController,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                decoration: _inputDecoration(hint: 'Nama kamu', icon: Icons.person_outline_rounded),
+                validator: (value) => (value?.trim().length ?? 0) < 2 ? 'Nama minimal 2 karakter.' : null,
+              ),
+              const SizedBox(height: 16),
+            ],
             _fieldLabel('Email akun'),
             const SizedBox(height: 8),
             TextFormField(
@@ -300,7 +314,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
             ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 180),
-              child: _recognizedAccount == null
+              child: _isRegistering || _recognizedAccount == null
                   ? const SizedBox(height: 14, key: ValueKey('empty-role'))
                   : _recognizedRoleBadge(_recognizedAccount!),
             ),
@@ -332,10 +346,26 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
                       ),
                     ),
                   ),
-              validator: (value) =>
-                  (value?.isEmpty ?? true) ? 'Kata sandi wajib diisi.' : null,
+              validator: (value) => (value?.isEmpty ?? true)
+                  ? 'Kata sandi wajib diisi.'
+                  : (_isRegistering && (value?.length ?? 0) < 8)
+                      ? 'Kata sandi minimal 8 karakter.'
+                      : null,
             ),
-            Align(
+            if (_isRegistering) ...[
+              const SizedBox(height: 16),
+              _fieldLabel('Ulangi kata sandi'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _handleLogin(),
+                decoration: _inputDecoration(hint: 'Ulangi kata sandi', icon: Icons.lock_outline_rounded),
+                validator: (value) => value != _passwordController.text ? 'Kata sandi belum sama.' : null,
+              ),
+            ],
+            if (!_isRegistering) Align(
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
@@ -381,7 +411,9 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
                 onPressed: _isLoading ? null : _handleLogin,
                 icon: const Icon(Icons.arrow_forward_rounded, size: 19),
                 label: Text(
-                  _isLoading ? 'Memeriksa akun...' : 'Masuk Sekarang',
+                  _isLoading
+                      ? (_isRegistering ? 'Membuat akun...' : 'Memeriksa akun...')
+                      : (_isRegistering ? 'Daftar sebagai Siswa' : 'Masuk Sekarang'),
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -397,8 +429,23 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 22),
-            _buildDemoAccounts(),
+            const SizedBox(height: 10),
+            Center(
+              child: TextButton(
+                onPressed: _isLoading
+                    ? null
+                    : () => setState(() {
+                        _isRegistering = !_isRegistering;
+                        _errorMessage = null;
+                        _formKey.currentState?.reset();
+                      }),
+                child: Text(_isRegistering ? 'Sudah punya akun? Masuk' : 'Belum punya akun? Daftar sebagai siswa'),
+              ),
+            ),
+            if (!_isRegistering) ...[
+              const SizedBox(height: 8),
+              _buildDemoAccounts(),
+            ],
           ],
         ),
       ),

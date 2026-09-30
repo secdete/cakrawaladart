@@ -1,6 +1,6 @@
 # Cakrawala API
 
-Backend memakai Node.js, TypeScript, dan SQLite. API mempertahankan path dan format respons yang dipakai Flutter.
+Backend memakai Node.js dan TypeScript. Database lokal menggunakan SQLite; saat `DATABASE_URL` diisi, backend memakai PostgreSQL Supabase. API mempertahankan path dan format respons yang dipakai Flutter.
 
 ## Menjalankan lokal
 
@@ -68,13 +68,16 @@ Untuk database baru, kredensial admin bisa diatur melalui `ADMIN_LOGIN_EMAIL` da
 - `GET /api/programs` — katalog paket; mendukung query `grade`.
 - `POST /api/leads` — simpan permintaan konsultasi.
 - `GET /api/admin/leads` — akses token lama melalui `ADMIN_API_TOKEN`.
-- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/me` — autentikasi bearer.
-- `POST /api/admin/users` — admin membuat akun bersama dengan body `email`, `password`, `role`, dan `name`.
+- `POST /api/auth/register` — pendaftaran akun siswa; role selain siswa hanya bisa dibuat admin.
+- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/me` — autentikasi bearer dan sesi.
+- `POST /api/admin/users` — admin membuat akun siswa, orang tua, tutor, atau admin dengan body `email`, `password`, `role`, dan `name`.
 - `GET /api/student/dashboard`, `/api/parent/dashboard`, `/api/tutor/dashboard`, `/api/admin/dashboard` — dashboard berdasarkan role.
 - `POST /api/student/questions`; `POST /api/tutor/questions/{id}/reply` — pertanyaan siswa dan balasan tutor.
 - `GET /api/tryouts/sample/question`, `POST /api/tryouts/sample/answer` — tryout contoh.
-- `POST /api/tutor/notes` — catatan pembelajaran tutor.
-- `PATCH /api/tutor/sessions/{id}` — ubah status sesi tutor.
+- `POST /api/tutor/notes` — tutor menyimpan catatan belajar yang dapat dilihat siswa/orang tua.
+- `PATCH /api/tutor/sessions/{id}` — tutor menandai sesi selesai atau membatalkannya.
+- Dashboard admin menyajikan ringkasan leads dan pengguna; pembuatan akun dibatasi untuk admin.
+- Dashboard tutor menyajikan sesi yang ditugaskan, pertanyaan siswa, dan catatan pembelajaran.
 
 ## Konfigurasi deployment
 

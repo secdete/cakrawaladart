@@ -179,6 +179,11 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
       title: const BimbelLogo(size: 34),
       actions: [
         IconButton(
+          tooltip: 'Muat ulang data',
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: () => setState(_load),
+        ),
+        IconButton(
           tooltip: 'Keluar',
           icon: const Icon(Icons.logout_rounded),
           onPressed: () async {
@@ -202,7 +207,24 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
         }
         if (snapshot.hasError) {
           return Center(
-            child: Text('Data tutor gagal dimuat: ${snapshot.error}'),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Card(
+                margin: const EdgeInsets.all(24),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.cloud_off_rounded, size: 38, color: Color(0xFF64748B)),
+                    const SizedBox(height: 12),
+                    Text('Data tutor belum dapat dimuat', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 17)),
+                    const SizedBox(height: 8),
+                    Text('${snapshot.error}', textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF64748B))),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(onPressed: () => setState(_load), icon: const Icon(Icons.refresh_rounded), label: const Text('Coba lagi')),
+                  ]),
+                ),
+              ),
+            ),
           );
         }
         final data = snapshot.data!;
@@ -246,12 +268,11 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Dashboard Tutor',
-                              style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white70,
-                              ),
-                            ),
+                            Row(children: [
+                              const Icon(Icons.auto_awesome_rounded, color: Color(0xFF93C5FD), size: 17),
+                              const SizedBox(width: 7),
+                              Text('RUANG KERJA TUTOR', style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                            ]),
                             const SizedBox(height: 8),
                             Text(
                               profile['name'] ?? 'Tutor Cakrawala',
@@ -265,6 +286,12 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
                             Text(
                               profile['specialization'] ?? '',
                               style: const TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+                              decoration: BoxDecoration(color: Colors.white.withValues(alpha: .12), borderRadius: BorderRadius.circular(30)),
+                              child: Text('${summary['upcomingSessions'] ?? 0} sesi mendatang', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                             ),
                           ],
                         ),
@@ -310,8 +337,13 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
                       ...sessions.map(
                         (session) => Card(
                           margin: const EdgeInsets.only(bottom: 12),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(17),
+                            side: const BorderSide(color: Color(0xFFE5EAF2)),
+                          ),
                           child: Padding(
-                            padding: const EdgeInsets.all(18),
+                            padding: const EdgeInsets.all(20),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -344,6 +376,15 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
                                         ),
                                         child: const Text('Tandai selesai'),
                                       ),
+                                    if (session['status'] == 'Mendatang')
+                                      OutlinedButton.icon(
+                                        onPressed: () => _setStatus(
+                                          session['id'] as String,
+                                          'Dibatalkan',
+                                        ),
+                                        icon: const Icon(Icons.event_busy_rounded),
+                                        label: const Text('Batalkan sesi'),
+                                      ),
                                   ],
                                 ),
                               ],
@@ -366,7 +407,21 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
                         ),
                       ...questions.map(
                         (question) => Card(
+                          elevation: 0,
+                          margin: const EdgeInsets.only(bottom: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            side: const BorderSide(color: Color(0xFFE5EAF2)),
+                          ),
                           child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                            leading: CircleAvatar(
+                              backgroundColor: const Color(0xFFF1F5F9),
+                              child: Icon(
+                                question['status'] == 'Dijawab' ? Icons.check_rounded : Icons.question_answer_outlined,
+                                color: question['status'] == 'Dijawab' ? Colors.green : AppColors.primaryBlue,
+                              ),
+                            ),
                             title: Text(
                               '${question['studentName']} · ${question['status']}',
                             ),
@@ -392,6 +447,11 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
+                      if (notes.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Text('Catatan sesi yang dibuat tutor akan tampil di sini.', style: TextStyle(color: Color(0xFF64748B))),
+                        ),
                       ...notes.map(
                         (note) => ListTile(
                           leading: const CircleAvatar(

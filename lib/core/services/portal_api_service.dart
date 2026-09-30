@@ -65,6 +65,27 @@ class PortalApiService {
     return user!;
   }
 
+  Future<Map<String, dynamic>> registerStudent({
+    required String name,
+    required String email,
+    required String password,
+  }) => _request(
+    'auth/register',
+    method: 'POST',
+    body: {'name': name, 'email': email, 'password': password},
+  );
+
+  Future<Map<String, dynamic>> createUser({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+  }) => _request(
+    'admin/users',
+    method: 'POST',
+    body: {'name': name, 'email': email, 'password': password, 'role': role},
+  );
+
   Future<void> logout() async {
     try {
       await _request('auth/logout', method: 'POST');

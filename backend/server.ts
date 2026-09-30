@@ -140,9 +140,20 @@ async function createLead(db: DatabaseAdapter, payload: RequestData): Promise<{ 
 }
 
 async function getDashboard(db: DatabaseAdapter, role: Role, user: Profile, res: ServerResponse): Promise<void> {
-  if (role === 'admin') {
-    const leads = await db.prepare('SELECT * FROM leads ORDER BY created_at DESC LIMIT 500').all();
-    response(res, 200, { profile: user, leads, summary: { totalLeads: leads.length, newLeads: leads.filter(lead => lead.status === 'new').length } });
+      if (role === 'admin') {
+        const leads = await db.prepare('SELECT * FROM leads ORDER BY created_at DESC LIMIT 500').all();
+    const users = await db.prepare('SELECT id,email,role,profile_json,active FROM users ORDER BY email').all();
+    response(res, 200, {
+      profile: user, leads,
+      users: users.map(row => ({ id: row.id, email: row.email, role: row.role, active: Boolean(row.active), ...JSON.parse(String(row.profile_json)) })),
+      summary: {
+        totalLeads: leads.length,
+        newLeads: leads.filter(lead => lead.status === 'new').length,
+        totalUsers: users.filter(row => Boolean(row.active)).length,
+        students: users.filter(row => row.role === 'student' && Boolean(row.active)).length,
+        tutors: users.filter(row => row.role === 'tutor' && Boolean(row.active)).length,
+      },
+    });
     return;
   }
   if (role === 'tutor') {
@@ -214,7 +225,7 @@ export async function createApiServer(databasePath = DATABASE_PATH): Promise<Ser
         response(res, 200, { items: await db.prepare('SELECT * FROM leads ORDER BY created_at DESC LIMIT ?').all(limit) }); return;
       }
       if (req.method === 'POST') {
-        const supported = ['/api/leads','/api/auth/login','/api/auth/logout','/api/student/questions','/api/tryouts/sample/answer','/api/tutor/notes','/api/admin/users'];
+        const supported = ['/api/leads','/api/auth/register','/api/auth/login','/api/auth/logout','/api/student/questions','/api/tryouts/sample/answer','/api/tutor/notes','/api/admin/users'];
         const replyMatch = route.match(/^\/api\/tutor\/questions\/([^/]+)\/reply$/);
         if (!supported.includes(route) && !replyMatch) { response(res, 404, { error: 'Endpoint tidak ditemukan.' }); return; }
         let payload: RequestData | null;
@@ -222,6 +233,21 @@ export async function createApiServer(databasePath = DATABASE_PATH): Promise<Ser
         catch (error) { response(res, 413, { error: error instanceof Error && error.message === 'BODY_TOO_LARGE' ? 'Ukuran permintaan tidak valid.' : 'Body JSON tidak valid.' }); return; }
         if (!payload) { response(res, 400, { error: 'Body JSON harus object.' }); return; }
         const ip = req.socket.remoteAddress || 'unknown';
+        if (route === '/api/auth/register') {
+          if (!checkRateLimit(authRequests, ip, AUTH_RATE_LIMIT, AUTH_RATE_WINDOW_MS)) { response(res, 429, { error: 'Terlalu banyak percobaan. Coba lagi nanti.' }); return; }
+          const email = String(payload.email ?? '').trim().toLowerCase();
+          const password = String(payload.password ?? '');
+          const name = String(payload.name ?? '').trim();
+          if (name.length < 2 || name.length > 100) { response(res, 422, { error: 'Nama harus berisi 2–100 karakter.' }); return; }
+          if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { response(res, 422, { error: 'Format email tidak valid.' }); return; }
+          if (password.length < 8 || password.length > 200) { response(res, 422, { error: 'Kata sandi harus berisi 8–200 karakter.' }); return; }
+          if (await db.prepare('SELECT 1 FROM users WHERE email=?').get(email)) { response(res, 409, { error: 'Email sudah terdaftar. Silakan masuk.' }); return; }
+          const id = randomUUID(); const salt = randomTokenBytes(16);
+          const profile = { name, email };
+          await db.prepare('INSERT INTO users (id,email,password_salt,password_hash,role,profile_json,active) VALUES (?,?,?,?,?,?,1)')
+            .run(id, email, salt.toString('hex'), hashPassword(password, salt), 'student', JSON.stringify(profile));
+          response(res, 201, { user: { id, email, name, role: 'student' } }); return;
+        }
         if (route === '/api/auth/login') {
           if (!checkRateLimit(authRequests, ip, AUTH_RATE_LIMIT, AUTH_RATE_WINDOW_MS)) { response(res, 429, { error: 'Terlalu banyak percobaan masuk. Coba lagi nanti.' }); return; }
           const email = String(payload.email ?? '').trim().toLowerCase(); const password = String(payload.password ?? '');
