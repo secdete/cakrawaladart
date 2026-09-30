@@ -188,7 +188,16 @@ def _hash_password(password: str, salt: bytes) -> bytes:
 
 
 def seed_portal(connection: sqlite3.Connection) -> None:
-    for account in DEMO_ACCOUNTS:
+    admin_email = os.environ.get("ADMIN_LOGIN_EMAIL", "admin@cakrawalaeducentre.com").strip().lower()
+    admin_password = os.environ.get("ADMIN_LOGIN_PASSWORD", "cakrawala2026")
+    accounts = [*DEMO_ACCOUNTS, {
+        "id": "admin-cakrawala",
+        "email": admin_email,
+        "password": admin_password,
+        "role": "admin",
+        "profile": {"name": "Administrator Cakrawala", "email": admin_email},
+    }]
+    for account in accounts:
         if connection.execute("SELECT 1 FROM users WHERE id = ?", (account["id"],)).fetchone():
             continue
         salt = secrets.token_bytes(16)
@@ -372,7 +381,7 @@ class ApiHandler(BaseHTTPRequestHandler):
         if parsed.path == "/api/programs":
             grade = parse_qs(parsed.query).get("grade", [""])[0].strip()
             return self._send(200, {"items": list_programs(grade)})
-        if parsed.path in {"/api/me", "/api/student/dashboard", "/api/parent/dashboard", "/api/tutor/dashboard"}:
+        if parsed.path in {"/api/me", "/api/student/dashboard", "/api/parent/dashboard", "/api/tutor/dashboard", "/api/admin/dashboard"}:
             user = _require_user(self)
             if not user:
                 return self._send(401, {"error": "Sesi tidak valid atau sudah berakhir."})
@@ -382,6 +391,10 @@ class ApiHandler(BaseHTTPRequestHandler):
             if user["role"] != expected_role:
                 return self._send(403, {"error": "Akun tidak memiliki akses ke dashboard ini."})
             with connect_database() as connection:
+                if expected_role == "admin":
+                    rows = connection.execute("SELECT * FROM leads ORDER BY created_at DESC LIMIT 500").fetchall()
+                    leads = [dict(row) for row in rows]
+                    return self._send(200, {"profile": user, "leads": leads, "summary": {"totalLeads": len(leads), "newLeads": sum(lead["status"] == "new" for lead in leads)}})
                 student_id = user["id"] if expected_role == "student" else user.get("childId", "") if expected_role == "parent" else ""
                 if expected_role == "tutor":
                     rows = connection.execute("SELECT s.*, u.profile_json FROM sessions s JOIN users u ON u.id=s.student_id WHERE s.tutor_id=? ORDER BY s.scheduled_at", (user["id"],)).fetchall()
