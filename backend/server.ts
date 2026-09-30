@@ -62,6 +62,40 @@ function noteJson(row: Record<string, unknown>): Record<string, unknown> {
     studentComprehension: row.comprehension, homeworkAssigned: row.homework, notesForParents: row.parent_note,
   };
 }
+function classJson(row: Record<string, unknown>): Record<string, unknown> {
+  const date = new Date(String(row.scheduled_at));
+  const tutor = JSON.parse(String(row.tutor_profile_json || '{}')) as Record<string, unknown>;
+  return {
+    id: row.id, title: row.title, subject: row.subject, description: row.description,
+    tutorId: row.tutor_id, tutorName: tutor.name || 'Tutor Cakrawala',
+    scheduledAt: row.scheduled_at,
+    dateTimeFormatted: new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', dateStyle: 'full', timeStyle: 'short' }).format(date),
+    durationMinutes: Number(row.duration_minutes), meetingUrl: row.meeting_url,
+    enrolled: Boolean(row.enrolled),
+  };
+}
+async function listClasses(db: DatabaseAdapter, user: Profile): Promise<Record<string, unknown>[]> {
+  let rows: Row[];
+  if (user.role === 'admin') {
+    rows = await db.prepare(`SELECT c.*,t.profile_json AS tutor_profile_json,1 AS enrolled
+      FROM classes c JOIN users t ON t.id=c.tutor_id WHERE c.active=1 ORDER BY c.scheduled_at`).all();
+  } else if (user.role === 'tutor') {
+    rows = await db.prepare(`SELECT c.*,t.profile_json AS tutor_profile_json,1 AS enrolled
+      FROM classes c JOIN users t ON t.id=c.tutor_id WHERE c.active=1 AND c.tutor_id=? ORDER BY c.scheduled_at`).all(user.id);
+  } else if (user.role === 'parent') {
+    const childId = String(user.childId || '');
+    rows = childId ? await db.prepare(`SELECT c.*,t.profile_json AS tutor_profile_json,1 AS enrolled
+      FROM classes c JOIN users t ON t.id=c.tutor_id JOIN class_enrollments e ON e.class_id=c.id
+      WHERE c.active=1 AND e.student_id=? ORDER BY c.scheduled_at`).all(childId) : [];
+  } else {
+    rows = await db.prepare(`SELECT c.*,t.profile_json AS tutor_profile_json,
+      CASE WHEN e.student_id IS NULL THEN 0 ELSE 1 END AS enrolled
+      FROM classes c JOIN users t ON t.id=c.tutor_id
+      LEFT JOIN class_enrollments e ON e.class_id=c.id AND e.student_id=?
+      WHERE c.active=1 ORDER BY c.scheduled_at`).all(user.id);
+  }
+  return rows.map(classJson);
+}
 function bearer(req: IncomingMessage): string {
   const value = String(req.headers.authorization || '');
   return value.startsWith('Bearer ') ? value.slice(7).trim() : '';
@@ -146,12 +180,14 @@ async function getDashboard(db: DatabaseAdapter, role: Role, user: Profile, res:
     response(res, 200, {
       profile: user, leads,
       users: users.map(row => ({ id: row.id, email: row.email, role: row.role, active: Boolean(row.active), ...JSON.parse(String(row.profile_json)) })),
+      classes: await listClasses(db, user),
       summary: {
         totalLeads: leads.length,
         newLeads: leads.filter(lead => lead.status === 'new').length,
         totalUsers: users.filter(row => Boolean(row.active)).length,
         students: users.filter(row => row.role === 'student' && Boolean(row.active)).length,
         tutors: users.filter(row => row.role === 'tutor' && Boolean(row.active)).length,
+        totalClasses: (await db.prepare('SELECT COUNT(*) AS count FROM classes WHERE active=1').get())?.count ?? 0,
       },
     });
     return;
@@ -166,7 +202,7 @@ async function getDashboard(db: DatabaseAdapter, role: Role, user: Profile, res:
     const qRows = await db.prepare(`SELECT q.*,u.profile_json FROM student_questions q JOIN users u ON u.id=q.student_id
       WHERE EXISTS (SELECT 1 FROM sessions s WHERE s.student_id=q.student_id AND s.tutor_id=?) ORDER BY q.created_at DESC`).all(user.id);
     const questions = qRows.map(row => ({ id: row.id, studentId: row.student_id, studentName: (JSON.parse(String(row.profile_json)) as Record<string, unknown>).name, question: row.question, status: row.status, createdAt: row.created_at, reply: row.tutor_reply }));
-    response(res, 200, { profile: user, sessions, notes, questions, summary: { totalSessions: sessions.length, upcomingSessions: sessions.filter(s => s.status === 'Mendatang').length, totalStudents: new Set(sessions.map(s => s.studentName)).size } });
+    response(res, 200, { profile: user, sessions, classes: await listClasses(db, user), notes, questions, summary: { totalSessions: sessions.length, upcomingSessions: sessions.filter(s => s.status === 'Mendatang').length, totalStudents: new Set(sessions.map(s => s.studentName)).size } });
     return;
   }
   const studentId = role === 'student' ? user.id : String(user.childId || '');
@@ -182,7 +218,7 @@ async function getDashboard(db: DatabaseAdapter, role: Role, user: Profile, res:
   const questionRows = await db.prepare('SELECT * FROM student_questions WHERE student_id=? ORDER BY created_at DESC').all(studentId);
   const questions = questionRows.map(row => ({ id: row.id, question: row.question, status: row.status, createdAt: row.created_at, reply: row.tutor_reply }));
   response(res, 200, {
-    profile, sessions: sessionsRows.map(row => sessionJson(row)), notes: notesRows.map(row => noteJson(row)), questions,
+    profile, sessions: sessionsRows.map(row => sessionJson(row)), classes: await listClasses(db, user), notes: notesRows.map(row => noteJson(row)), questions,
     tryouts: [{ id: 'sample-tryout', title: 'Drill Penalaran Kuantitatif', category: 'UTBK-SNBT', totalQuestions: 1, durationMinutes: 10, score: Number(attempts.count) ? Number(attempts.correct || 0) * 100 : null, rank: null, totalParticipants: null, status: Number(attempts.count) ? 'Selesai' : 'Tersedia', deadlineFormatted: 'Latihan interaktif' }],
     summary: { questionsAsked: questionCount, attempts: Number(attempts.count), correctAnswers: Number(attempts.correct || 0) },
   });
@@ -202,6 +238,11 @@ export async function createApiServer(databasePath = DATABASE_PATH): Promise<Ser
         const rows = await db.prepare('SELECT data_json,grades_json FROM programs WHERE active=1 ORDER BY id').all() as Array<{data_json: string; grades_json: string}>;
         const items = rows.filter(row => !grade || grade === 'Semua Jenjang' || (JSON.parse(row.grades_json) as string[]).includes(grade)).map(row => JSON.parse(row.data_json));
         response(res, 200, { items }); return;
+      }
+      if (req.method === 'GET' && route === '/api/classes') {
+        const user = await requireUser(db, req);
+        if (!user) { response(res, 401, { error: 'Sesi tidak valid atau sudah berakhir.' }); return; }
+        response(res, 200, { items: await listClasses(db, user) }); return;
       }
       if (req.method === 'GET' && ['/api/me','/api/student/dashboard','/api/parent/dashboard','/api/tutor/dashboard','/api/admin/dashboard'].includes(route)) {
         const user = await requireUser(db, req);
@@ -225,9 +266,10 @@ export async function createApiServer(databasePath = DATABASE_PATH): Promise<Ser
         response(res, 200, { items: await db.prepare('SELECT * FROM leads ORDER BY created_at DESC LIMIT ?').all(limit) }); return;
       }
       if (req.method === 'POST') {
-        const supported = ['/api/leads','/api/auth/register','/api/auth/login','/api/auth/logout','/api/student/questions','/api/tryouts/sample/answer','/api/tutor/notes','/api/admin/users'];
+        const supported = ['/api/leads','/api/auth/register','/api/auth/login','/api/auth/logout','/api/student/questions','/api/tryouts/sample/answer','/api/tutor/notes','/api/admin/users','/api/admin/classes'];
         const replyMatch = route.match(/^\/api\/tutor\/questions\/([^/]+)\/reply$/);
-        if (!supported.includes(route) && !replyMatch) { response(res, 404, { error: 'Endpoint tidak ditemukan.' }); return; }
+        const enrollMatch = route.match(/^\/api\/classes\/([^/]+)\/enroll$/);
+        if (!supported.includes(route) && !replyMatch && !enrollMatch) { response(res, 404, { error: 'Endpoint tidak ditemukan.' }); return; }
         let payload: RequestData | null;
         try { payload = await readJson(req); }
         catch (error) { response(res, 413, { error: error instanceof Error && error.message === 'BODY_TOO_LARGE' ? 'Ukuran permintaan tidak valid.' : 'Body JSON tidak valid.' }); return; }
@@ -275,6 +317,39 @@ export async function createApiServer(databasePath = DATABASE_PATH): Promise<Ser
         }
         const user = await requireUser(db, req);
         if (!user) { response(res, 401, { error: 'Sesi tidak valid atau sudah berakhir.' }); return; }
+        if (route === '/api/admin/classes') {
+          if (user.role !== 'admin') { response(res, 403, { error: 'Hanya admin dapat membuat kelas.' }); return; }
+          const title = String(payload.title ?? '').trim();
+          const subject = String(payload.subject ?? '').trim();
+          const description = String(payload.description ?? '').trim();
+          const tutorId = String(payload.tutorId ?? '').trim();
+          const scheduledAt = String(payload.scheduledAt ?? '').trim();
+          const durationMinutes = Number(payload.durationMinutes ?? 60);
+          const meetingUrl = String(payload.meetingUrl ?? '').trim();
+          if (title.length < 3 || title.length > 120) { response(res, 422, { error: 'Nama kelas harus berisi 3–120 karakter.' }); return; }
+          if (subject.length < 2 || subject.length > 100) { response(res, 422, { error: 'Mata pelajaran harus berisi 2–100 karakter.' }); return; }
+          if (description.length > 2000) { response(res, 422, { error: 'Deskripsi maksimal 2.000 karakter.' }); return; }
+          if (!Number.isInteger(Date.parse(scheduledAt))) { response(res, 422, { error: 'Jadwal kelas tidak valid.' }); return; }
+          if (!Number.isInteger(durationMinutes) || durationMinutes < 15 || durationMinutes > 300) { response(res, 422, { error: 'Durasi kelas harus 15–300 menit.' }); return; }
+          if (meetingUrl) {
+            try { const parsed = new URL(meetingUrl); if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error(); }
+            catch { response(res, 422, { error: 'Tautan kelas harus berupa URL HTTP atau HTTPS yang valid.' }); return; }
+          }
+          const tutor = await db.prepare("SELECT 1 FROM users WHERE id=? AND role='tutor' AND active=1").get(tutorId);
+          if (!tutor) { response(res, 422, { error: 'Tutor aktif tidak ditemukan.' }); return; }
+          const id = randomUUID(); const createdAt = nowIso();
+          await db.prepare(`INSERT INTO classes (id,title,subject,description,tutor_id,scheduled_at,duration_minutes,meeting_url,created_by,created_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?)`).run(id, title, subject, description, tutorId, new Date(scheduledAt).toISOString(), durationMinutes, meetingUrl, user.id, createdAt);
+          const created = (await listClasses(db, user)).find(item => item.id === id);
+          response(res, 201, { item: created }); return;
+        }
+        if (enrollMatch) {
+          if (user.role !== 'student') { response(res, 403, { error: 'Hanya akun siswa yang dapat bergabung ke kelas.' }); return; }
+          const classRow = await db.prepare('SELECT id FROM classes WHERE id=? AND active=1').get(enrollMatch[1]);
+          if (!classRow) { response(res, 404, { error: 'Kelas tidak ditemukan atau sudah ditutup.' }); return; }
+          const result = await db.prepare('INSERT OR IGNORE INTO class_enrollments (class_id,student_id,enrolled_at) VALUES (?,?,?)').run(enrollMatch[1], user.id, nowIso());
+          response(res, result.changes ? 201 : 200, { enrolled: true }); return;
+        }
         if (route === '/api/admin/users') {
           if (user.role !== 'admin') { response(res, 403, { error: 'Hanya admin dapat membuat akun.' }); return; }
           const email = String(payload.email ?? '').trim().toLowerCase();
@@ -336,6 +411,24 @@ export async function createApiServer(databasePath = DATABASE_PATH): Promise<Ser
         }
       }
       if (req.method === 'PATCH') {
+        if (route === '/api/me') {
+          const user = await requireUser(db, req);
+          if (!user) { response(res, 401, { error: 'Sesi tidak valid atau sudah berakhir.' }); return; }
+          let payload: RequestData | null;
+          try { payload = await readJson(req); } catch { response(res, 400, { error: 'Body JSON tidak valid.' }); return; }
+          if (!payload) { response(res, 400, { error: 'Body JSON harus object.' }); return; }
+          const name = String(payload.name ?? '').trim();
+          const phone = String(payload.phone ?? '').trim();
+          if (name.length < 2 || name.length > 100) { response(res, 422, { error: 'Nama harus berisi 2–100 karakter.' }); return; }
+          const digits = phone.replace(/\D/g, '');
+          if (phone && (digits.length < 8 || digits.length > 15)) { response(res, 422, { error: 'Nomor telepon harus berisi 8–15 digit.' }); return; }
+          const row = await db.prepare('SELECT profile_json FROM users WHERE id=?').get(user.id) as { profile_json: string } | undefined;
+          if (!row) { response(res, 404, { error: 'Profil tidak ditemukan.' }); return; }
+          const profile = { ...JSON.parse(row.profile_json) as Record<string, unknown>, name, phone };
+          await db.prepare('UPDATE users SET profile_json=? WHERE id=?').run(JSON.stringify(profile), user.id);
+          const updated = await db.prepare('SELECT * FROM users WHERE id=?').get(user.id) as Row;
+          response(res, 200, { user: publicUser(updated) }); return;
+        }
         const match = route.match(/^\/api\/tutor\/sessions\/([^/]+)$/);
         if (!match) { response(res, 404, { error: 'Endpoint tidak ditemukan.' }); return; }
         const tutor = await requireUser(db, req, ['tutor']);

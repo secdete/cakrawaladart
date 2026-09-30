@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class PortalApiService {
@@ -16,6 +17,7 @@ class PortalApiService {
   String? token;
   Map<String, dynamic>? user;
   Map<String, dynamic>? lastDashboard;
+  final ValueNotifier<Map<String, dynamic>?> activeSession = ValueNotifier(null);
 
   Map<String, String> get _headers => {
     'Accept': 'application/json',
@@ -62,6 +64,7 @@ class PortalApiService {
     );
     token = result['token'] as String;
     user = Map<String, dynamic>.from(result['user'] as Map);
+    activeSession.value = user;
     return user!;
   }
 
@@ -92,12 +95,48 @@ class PortalApiService {
     } finally {
       token = null;
       user = null;
+      activeSession.value = null;
     }
+  }
+
+  Future<Map<String, dynamic>> fetchProfile() async {
+    final result = await _request('me');
+    user = Map<String, dynamic>.from(result['user'] as Map);
+    activeSession.value = user;
+    return user!;
+  }
+
+  Future<Map<String, dynamic>> updateProfile({
+    required String name,
+    required String phone,
+  }) async {
+    final result = await _request(
+      'me',
+      method: 'PATCH',
+      body: {'name': name, 'phone': phone},
+    );
+    user = Map<String, dynamic>.from(result['user'] as Map);
+    activeSession.value = user;
+    return user!;
   }
 
   Future<Map<String, dynamic>> dashboard(String role) async {
     lastDashboard = await _request('$role/dashboard');
     return lastDashboard!;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchClasses() async {
+    final result = await _request('classes');
+    return List<Map<String, dynamic>>.from(
+      (result['items'] as List? ?? const []).map((item) => Map<String, dynamic>.from(item as Map)),
+    );
+  }
+
+  Future<Map<String, dynamic>> createClass(Map<String, dynamic> data) async =>
+      _request('admin/classes', method: 'POST', body: data);
+
+  Future<void> enrollInClass(String id) async {
+    await _request('classes/$id/enroll', method: 'POST');
   }
 
   Future<Map<String, dynamic>> sendQuestion(String question) async => _request(

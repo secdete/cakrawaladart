@@ -6,7 +6,14 @@ import '../../../core/models/bimbel_program.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../auth/screens/bimbel_login_screen.dart';
+import '../../classes/screens/classes_screen.dart';
+import '../../admin/screens/admin_dashboard_screen.dart';
+import '../../parent/screens/parent_monitoring_screen.dart';
+import '../../profile/screens/account_profile_screen.dart';
+import '../../profile/widgets/account_menu_button.dart';
 import '../../student/screens/student_dashboard_screen.dart';
+import '../../tutor/screens/tutor_dashboard_screen.dart';
+import '../../../core/services/portal_api_service.dart';
 import '../services/landing_api_service.dart';
 import '../widgets/landing_lead_dialog.dart';
 
@@ -46,6 +53,38 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
 
   void _loadPrograms() {
     _programsFuture = _api.fetchPrograms(_selectedGradeFilter);
+  }
+
+  Future<void> _openDashboard(Map<String, dynamic> user) async {
+    final role = user['role'] as String?;
+    if (role == null) return;
+    try {
+      await PortalApiService.instance.dashboard(role);
+      if (!mounted) return;
+      final Widget screen = switch (role) {
+        'student' => const StudentDashboardScreen(),
+        'parent' => const ParentMonitoringScreen(),
+        'tutor' => const TutorDashboardScreen(),
+        'admin' => const AdminDashboardScreen(),
+        _ => const BimbelLoginScreen(),
+      };
+      Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sesi tidak dapat dibuka: $error')),
+        );
+      }
+    }
+  }
+
+  void _openProfile() => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountProfileScreen()));
+
+  void _openClasses() => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClassesScreen()));
+
+  Future<void> _logoutFromHome() async {
+    await PortalApiService.instance.logout();
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kamu sudah keluar dari akun.')));
   }
 
   void _onGradeFilterChanged(String grade) {
@@ -101,58 +140,39 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             _buildNavItem('Tentang Kami'),
             const SizedBox(width: 8),
           ],
-          OutlinedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const BimbelLoginScreen(),
+          ValueListenableBuilder<Map<String, dynamic>?>(
+            valueListenable: PortalApiService.instance.activeSession,
+            builder: (context, user, _) => Row(mainAxisSize: MainAxisSize.min, children: [
+              if (user == null)
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BimbelLoginScreen())),
+                  icon: const Icon(Icons.login_rounded, size: 17),
+                  label: Text('Masuk', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 12)),
+                  style: OutlinedButton.styleFrom(foregroundColor: AppColors.primaryBlue, side: const BorderSide(color: AppColors.primaryBlue), padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                )
+              else
+                AccountMenuButton(
+                  label: 'Profil',
+                  onProfile: _openProfile,
+                  onClasses: _openClasses,
+                  onDashboard: () => _openDashboard(user),
+                  onLogout: () { _logoutFromHome(); },
                 ),
-              );
-            },
-            icon: const Icon(Icons.login_rounded, size: 16),
-            label: Text(
-              'Masuk',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primaryBlue,
-              side: const BorderSide(color: AppColors.primaryBlue),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const StudentDashboardScreen(),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: user == null
+                    ? () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BimbelLoginScreen()))
+                    : () => _openDashboard(user),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accentOrange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                child: Text(user == null ? 'Ruang Belajar' : 'Dashboard', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 12)),
               ),
-            ),
-            child: Text(
-              'Ruang Belajar',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              ),
-            ),
+            ]),
           ),
           const SizedBox(width: 16),
         ],
@@ -311,12 +331,12 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           children: [
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BimbelLoginScreen(),
-                  ),
-                );
+                final user = PortalApiService.instance.user;
+                if (user != null) {
+                  _openDashboard(user);
+                } else {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const BimbelLoginScreen()));
+                }
               },
               icon: const Icon(Icons.rocket_launch_rounded, size: 18),
               label: const Text('Mulai Belajar Sekarang'),

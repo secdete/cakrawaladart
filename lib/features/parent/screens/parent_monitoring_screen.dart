@@ -6,6 +6,9 @@ import '../../../core/services/portal_api_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../landing/screens/bimbel_landing_screen.dart';
+import '../../profile/screens/account_profile_screen.dart';
+import '../../profile/widgets/account_menu_button.dart';
+import '../../classes/screens/classes_screen.dart';
 
 class ParentMonitoringScreen extends StatelessWidget {
   const ParentMonitoringScreen({super.key});
@@ -30,19 +33,14 @@ class ParentMonitoringScreen extends StatelessWidget {
         elevation: 0,
         title: const BimbelLogo(size: 34),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.logout_rounded,
-              color: AppColors.textSecondary,
-            ),
-            onPressed: () async {
+          AccountMenuButton(
+            onProfile: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountProfileScreen())),
+            onClasses: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClassesScreen())),
+            onHome: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const BimbelLandingScreen()), (_) => false),
+            onLogout: () async {
               await PortalApiService.instance.logout();
               if (!context.mounted) return;
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const BimbelLandingScreen()),
-                (_) => false,
-              );
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const BimbelLandingScreen()), (_) => false);
             },
           ),
           const SizedBox(width: 8),

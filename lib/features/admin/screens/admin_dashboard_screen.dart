@@ -4,7 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/portal_api_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
+import '../../classes/screens/classes_screen.dart';
 import '../../landing/screens/bimbel_landing_screen.dart';
+import '../../profile/screens/account_profile_screen.dart';
+import '../../profile/widgets/account_menu_button.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -95,6 +98,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
+  void _openClasses() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const ClassesScreen())).then((_) {
+      if (mounted) _load();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final admin = PortalApiService.instance.user;
@@ -108,7 +117,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         title: const BimbelLogo(size: 36),
         actions: [
           IconButton(tooltip: 'Muat ulang', onPressed: _loading ? null : _load, icon: const Icon(Icons.refresh_rounded)),
-          IconButton(tooltip: 'Keluar', onPressed: _logout, icon: const Icon(Icons.logout_rounded)),
+          AccountMenuButton(
+            onProfile: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountProfileScreen())),
+            onClasses: _openClasses,
+            onHome: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const BimbelLandingScreen()), (_) => false),
+            onLogout: () { _logout(); },
+          ),
           const SizedBox(width: 10),
         ],
       ),
@@ -129,7 +143,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   const SizedBox(height: 3),
                   Text('Kelola akun dan pantau permintaan konsultasi Cakrawala.', style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 13)),
                 ])),
-                if (MediaQuery.sizeOf(context).width > 650) FilledButton.icon(onPressed: _showCreateUser, icon: const Icon(Icons.person_add_alt_1), label: const Text('Tambah akun')),
+                if (MediaQuery.sizeOf(context).width > 650) ...[
+                  OutlinedButton.icon(onPressed: _openClasses, icon: const Icon(Icons.menu_book_rounded), label: const Text('Kelola kelas'), style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white70))),
+                  const SizedBox(width: 8),
+                  FilledButton.icon(onPressed: _showCreateUser, icon: const Icon(Icons.person_add_alt_1), label: const Text('Tambah akun')),
+                ],
               ]),
             ),
             const SizedBox(height: 18),
@@ -139,12 +157,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _statCard('Total akun aktif', '${summary['totalUsers'] ?? 0}', Icons.groups_2_rounded, const Color(0xFF2563EB)),
               _statCard('Siswa', '${summary['students'] ?? 0}', Icons.school_rounded, const Color(0xFF0891B2)),
               _statCard('Tutor', '${summary['tutors'] ?? 0}', Icons.co_present_rounded, const Color(0xFF7C3AED)),
+              _statCard('Kelas aktif', '${summary['totalClasses'] ?? 0}', Icons.menu_book_rounded, const Color(0xFF059669)),
               _statCard('Leads baru', '${summary['newLeads'] ?? 0}', Icons.mark_email_unread_rounded, const Color(0xFFEA580C)),
             ]),
             const SizedBox(height: 24),
             Row(children: [
               Expanded(child: Text('Operasional', style: GoogleFonts.plusJakartaSans(fontSize: 21, fontWeight: FontWeight.w800, color: const Color(0xFF18243B)))),
-              if (MediaQuery.sizeOf(context).width <= 650) IconButton.filledTonal(onPressed: _showCreateUser, tooltip: 'Tambah akun', icon: const Icon(Icons.person_add_alt_1)),
+              if (MediaQuery.sizeOf(context).width <= 650) ...[
+                IconButton.filledTonal(onPressed: _openClasses, tooltip: 'Kelola kelas', icon: const Icon(Icons.menu_book_rounded)),
+                IconButton.filledTonal(onPressed: _showCreateUser, tooltip: 'Tambah akun', icon: const Icon(Icons.person_add_alt_1)),
+              ],
             ]),
             const SizedBox(height: 10),
             SegmentedButton<int>(

@@ -5,6 +5,9 @@ import '../../../core/services/portal_api_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../landing/screens/bimbel_landing_screen.dart';
+import '../../classes/screens/classes_screen.dart';
+import '../../profile/screens/account_profile_screen.dart';
+import '../../profile/widgets/account_menu_button.dart';
 
 class TutorDashboardScreen extends StatefulWidget {
   const TutorDashboardScreen({super.key});
@@ -23,6 +26,11 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
   }
 
   void _load() => _data = PortalApiService.instance.dashboard('tutor');
+
+  Future<void> _openClasses() async {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => const ClassesScreen()));
+    if (mounted) setState(_load);
+  }
 
   Future<void> _writeNote(Map<String, dynamic> session) async {
     final topic = TextEditingController();
@@ -183,18 +191,14 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
           icon: const Icon(Icons.refresh_rounded),
           onPressed: () => setState(_load),
         ),
-        IconButton(
-          tooltip: 'Keluar',
-          icon: const Icon(Icons.logout_rounded),
-          onPressed: () async {
+        AccountMenuButton(
+          onProfile: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountProfileScreen())),
+          onClasses: () { _openClasses(); },
+          onHome: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const BimbelLandingScreen()), (_) => false),
+          onLogout: () async {
             await PortalApiService.instance.logout();
-            if (context.mounted) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const BimbelLandingScreen()),
-                (_) => false,
-              );
-            }
+            if (!context.mounted) return;
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const BimbelLandingScreen()), (_) => false);
           },
         ),
       ],
@@ -233,6 +237,9 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
           (data['sessions'] as List).map(
             (item) => Map<String, dynamic>.from(item as Map),
           ),
+        );
+        final classes = List<Map<String, dynamic>>.from(
+          (data['classes'] as List? ?? const []).map((item) => Map<String, dynamic>.from(item as Map)),
         );
         final notes = List<Map<String, dynamic>>.from(
           (data['notes'] as List).map(
@@ -319,6 +326,28 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
                         ],
                       ),
                       const SizedBox(height: 28),
+                      Text(
+                        'Kelas yang diajar',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 21, fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 10),
+                      if (classes.isEmpty)
+                        const Card(child: Padding(padding: EdgeInsets.all(18), child: Text('Belum ada kelas yang ditugaskan.'))),
+                      ...classes.take(3).map((item) => Card(
+                        elevation: 0,
+                        margin: const EdgeInsets.only(bottom: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: Color(0xFFE5EAF2))),
+                        child: ListTile(
+                          leading: const CircleAvatar(backgroundColor: Color(0xFFEAF2FF), child: Icon(Icons.menu_book_rounded, color: Color(0xFF2563EB))),
+                          title: Text('${item['title'] ?? 'Kelas'}', style: const TextStyle(fontWeight: FontWeight.w700)),
+                          subtitle: Text('${item['subject'] ?? '-'} · ${item['dateTimeFormatted'] ?? '-'}'),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () { _openClasses(); },
+                        ),
+                      )),
+                      if (classes.length > 3)
+                        Align(alignment: Alignment.centerRight, child: TextButton(onPressed: () { _openClasses(); }, child: Text('Lihat semua ${classes.length} kelas'))),
+                      const SizedBox(height: 20),
                       Text(
                         'Jadwal dan siswa',
                         style: GoogleFonts.plusJakartaSans(

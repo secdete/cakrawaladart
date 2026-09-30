@@ -69,15 +69,19 @@ Untuk database baru, kredensial admin bisa diatur melalui `ADMIN_LOGIN_EMAIL` da
 - `POST /api/leads` — simpan permintaan konsultasi.
 - `GET /api/admin/leads` — akses token lama melalui `ADMIN_API_TOKEN`.
 - `POST /api/auth/register` — pendaftaran akun siswa; role selain siswa hanya bisa dibuat admin.
-- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/me` — autentikasi bearer dan sesi.
+- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/me`, `PATCH /api/me` — autentikasi bearer, sesi, dan baca/perbarui nama serta nomor telepon profil.
 - `POST /api/admin/users` — admin membuat akun siswa, orang tua, tutor, atau admin dengan body `email`, `password`, `role`, dan `name`.
-- `GET /api/student/dashboard`, `/api/parent/dashboard`, `/api/tutor/dashboard`, `/api/admin/dashboard` — dashboard berdasarkan role.
+- `POST /api/admin/classes` — admin membuat kelas, memilih tutor aktif, jadwal, durasi, dan tautan kelas.
+- `GET /api/classes` — daftar kelas sesuai role: kelas aktif, kelas tutor yang ditugaskan, atau kelas yang diikuti anak.
+- `POST /api/classes/{id}/enroll` — siswa bergabung ke kelas; pendaftaran disimpan di database bersama.
+- `GET /api/student/dashboard`, `/api/parent/dashboard`, `/api/tutor/dashboard`, `/api/admin/dashboard` — dashboard berdasarkan role, termasuk kelas yang relevan.
 - `POST /api/student/questions`; `POST /api/tutor/questions/{id}/reply` — pertanyaan siswa dan balasan tutor.
 - `GET /api/tryouts/sample/question`, `POST /api/tryouts/sample/answer` — tryout contoh.
 - `POST /api/tutor/notes` — tutor menyimpan catatan belajar yang dapat dilihat siswa/orang tua.
 - `PATCH /api/tutor/sessions/{id}` — tutor menandai sesi selesai atau membatalkannya.
 - Dashboard admin menyajikan ringkasan leads dan pengguna; pembuatan akun dibatasi untuk admin.
 - Dashboard tutor menyajikan sesi yang ditugaskan, pertanyaan siswa, dan catatan pembelajaran.
+- Tabel kelas dan keikutsertaan siswa dibuat otomatis saat backend pertama kali dijalankan. Akses Supabase Data API ke tabel tersebut dicabut; perubahan kelas hanya lewat API Node yang memeriksa sesi dan role.
 
 ## Konfigurasi deployment
 

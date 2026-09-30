@@ -6,8 +6,12 @@ import '../../../core/models/tryout_exam.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../landing/screens/bimbel_landing_screen.dart';
+import '../../classes/screens/classes_screen.dart';
+import '../../profile/screens/account_profile_screen.dart';
+import '../../profile/widgets/account_menu_button.dart';
 import '../../tryout/screens/tryout_portal_screen.dart';
 import '../../../core/services/portal_api_service.dart';
+import '../../profile/screens/account_profile_screen.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
@@ -18,6 +22,22 @@ class StudentDashboardScreen extends StatefulWidget {
 
 class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   List<LiveSession> _sessions = LiveSession.dummySessions;
+
+  Future<void> _logout() async {
+    await PortalApiService.instance.logout();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const BimbelLandingScreen()), (_) => false);
+  }
+
+  Future<void> _openClasses() async {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => const ClassesScreen()));
+    if (!mounted) return;
+    try {
+      await PortalApiService.instance.dashboard('student');
+      if (mounted) setState(() {});
+    } catch (_) {}
+  }
+
   void _showTanyaPrDialog() {
     final controller = TextEditingController();
     showDialog<void>(
@@ -106,21 +126,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         elevation: 0,
         title: const BimbelLogo(size: 34),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.logout_rounded,
-              color: AppColors.textSecondary,
-            ),
-            tooltip: 'Keluar ke Beranda',
-            onPressed: () async {
-              await PortalApiService.instance.logout();
-              if (!context.mounted) return;
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const BimbelLandingScreen()),
-                (_) => false,
-              );
-            },
+          AccountMenuButton(
+            onProfile: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountProfileScreen())),
+            onClasses: () { _openClasses(); },
+            onHome: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const BimbelLandingScreen()), (_) => false),
+            onLogout: () { _logout(); },
           ),
           const SizedBox(width: 12),
         ],
@@ -138,6 +148,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               children: [
                 _buildStudentWelcomeHeader(student, isDesktop),
                 const SizedBox(height: 24),
+                _buildClassesShortcut(context, dashboard),
+                const SizedBox(height: 18),
                 _buildActiveSessionBanner(context, isDesktop),
                 const SizedBox(height: 24),
                 if (answeredQuestions.isNotEmpty) ...[
@@ -182,6 +194,32 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             color: Colors.white,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildClassesShortcut(BuildContext context, Map<String, dynamic>? dashboard) {
+    final classes = dashboard?['classes'] as List? ?? const [];
+    final available = classes.where((item) => (item as Map)['enrolled'] != true).length;
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFE5EAF2))),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+        child: Row(children: [
+          Container(width: 42, height: 42, decoration: BoxDecoration(color: const Color(0xFFEAF2FF), borderRadius: BorderRadius.circular(13)), child: const Icon(Icons.menu_book_rounded, color: AppColors.primaryBlue)),
+          const SizedBox(width: 13),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Kelas belajar', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, color: AppColors.textHeading)),
+            Text(available > 0 ? '$available kelas tersedia untuk diikuti' : 'Lihat kelas yang diikuti dan jadwalmu', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+          ])),
+          OutlinedButton.icon(
+            onPressed: () { _openClasses(); },
+            icon: const Icon(Icons.arrow_forward_rounded, size: 17),
+            label: const Text('Lihat'),
+          ),
+        ]),
       ),
     );
   }

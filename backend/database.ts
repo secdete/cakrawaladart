@@ -139,6 +139,21 @@ export async function initializeDatabase(databasePath = DEFAULT_DATABASE_PATH): 
       time_range TEXT NOT NULL, session_type TEXT NOT NULL, status TEXT NOT NULL,
       meet_link TEXT NOT NULL, topic TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS classes (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, subject TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '', tutor_id TEXT NOT NULL REFERENCES users(id),
+      scheduled_at TEXT NOT NULL, duration_minutes INTEGER NOT NULL DEFAULT 60,
+      meeting_url TEXT NOT NULL DEFAULT '', active INTEGER NOT NULL DEFAULT 1,
+      created_by TEXT NOT NULL REFERENCES users(id), created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_classes_tutor_schedule ON classes(tutor_id, scheduled_at);
+    CREATE INDEX IF NOT EXISTS idx_classes_active_schedule ON classes(active, scheduled_at);
+    CREATE TABLE IF NOT EXISTS class_enrollments (
+      class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+      student_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      enrolled_at TEXT NOT NULL, PRIMARY KEY(class_id, student_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_class_enrollments_student ON class_enrollments(student_id, enrolled_at);
     CREATE TABLE IF NOT EXISTS tutor_notes (
       id TEXT PRIMARY KEY, session_id TEXT, student_id TEXT NOT NULL,
       tutor_id TEXT NOT NULL, subject TEXT NOT NULL, topic_covered TEXT NOT NULL,
@@ -161,6 +176,21 @@ export async function initializeDatabase(databasePath = DEFAULT_DATABASE_PATH): 
       consent_at TEXT, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new'
     );
   `);
+
+  if (db.dialect === 'postgres') {
+    await db.exec(`
+      ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE class_enrollments ENABLE ROW LEVEL SECURITY;
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
+          EXECUTE 'REVOKE ALL ON TABLE public.classes, public.class_enrollments FROM anon';
+        END IF;
+        IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN
+          EXECUTE 'REVOKE ALL ON TABLE public.classes, public.class_enrollments FROM authenticated';
+        END IF;
+      END $$;
+    `);
+  }
 
   if (db.dialect === 'sqlite') {
     const qCols = new Set((await db.prepare('PRAGMA table_info(student_questions)').all()).map(column => column.name));
