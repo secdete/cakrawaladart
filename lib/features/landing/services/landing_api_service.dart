@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../core/models/bimbel_program.dart';
@@ -34,28 +35,28 @@ class LandingApiService {
 
   Future<List<BimbelProgram>> fetchPrograms(String grade) async {
     try {
-      final uri = _baseUri.resolve('programs').replace(
-        queryParameters: grade.isEmpty ? null : {'grade': grade},
-      );
+      final uri = _baseUri
+          .resolve('programs')
+          .replace(queryParameters: grade.isEmpty ? null : {'grade': grade});
       final response = await _client
           .get(uri, headers: const {'Accept': 'application/json'})
           .timeout(const Duration(seconds: 3));
       final body = _decodeResponse(response);
       final items = body['items'];
       if (items is! List) {
-        throw const LandingApiException('Format katalog dari server tidak valid.');
+        throw const LandingApiException(
+          'Format katalog dari server tidak valid.',
+        );
       }
       return items
           .map(
-            (item) => BimbelProgram.fromJson(
-              Map<String, dynamic>.from(item as Map),
-            ),
+            (item) =>
+                BimbelProgram.fromJson(Map<String, dynamic>.from(item as Map)),
           )
           .toList(growable: false);
     } catch (e) {
       // Fallback to dummy data if server is unreachable
-      print('Failed to fetch from server: $e. Using dummy data fallback.');
-      await Future.delayed(const Duration(milliseconds: 500));
+      debugPrint('Failed to fetch from server: $e. Using dummy data fallback.');
       return BimbelProgram.dummyPrograms;
     }
   }
@@ -97,11 +98,14 @@ class LandingApiService {
     try {
       body = Map<String, dynamic>.from(jsonDecode(response.body) as Map);
     } on Object {
-      throw const LandingApiException('Server mengirim respons yang tidak valid.');
+      throw const LandingApiException(
+        'Server mengirim respons yang tidak valid.',
+      );
     }
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw LandingApiException(
-        body['error'] as String? ?? 'Permintaan ke server gagal (${response.statusCode}).',
+        body['error'] as String? ??
+            'Permintaan ke server gagal (${response.statusCode}).',
       );
     }
     return body;

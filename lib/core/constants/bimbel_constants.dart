@@ -1,14 +1,16 @@
-﻿class BimbelConstants {
+class BimbelConstants {
   static const String appName = 'Cakrawala Educentre';
   static const String appTagline = 'Bimbingan Belajar & Les Privat Terpadu';
   static const String companyName = 'PT Indo Prestasi Utama';
-  static const String moto = 'Wujudkan Impian Akademik & Tembus Sekolah / PTN Impian';
+  static const String moto =
+      'Wujudkan Impian Akademik & Tembus Sekolah / PTN Impian';
 
-  static const String contactPhone = '+62 812-8899-7700';
-  static const String contactWhatsApp = '6281288997700';
+  static const String contactPhone = '+62 813-2486-8790';
+  static const String contactWhatsApp = '6281324868790';
   static const String contactEmail = 'halo@cakrawalaeducentre.com';
   static const String websiteUrl = 'www.cakrawalaeducentre.com';
-  static const String operationalHeadquarters = 'Mustika Jaya, Kota Bekasi & Layanan Seluruh Indonesia';
+  static const String operationalHeadquarters =
+      'Jl. Siti 2 No. 7, Mustika Jaya, Ciketing, Kota Bekasi';
 
   // Program Categories
   static const List<String> gradeCategories = [
@@ -34,7 +36,8 @@
     'name': 'Farhan Arya Nugraha',
     'grade': 'Kelas 12 SMA - IPA (Target SNBT)',
     'school': 'SMAN Unggulan 1',
-    'targetPtn': 'STEI Institut Teknologi Bandung (Pilihan 1) & FK UI (Pilihan 2)',
+    'targetPtn':
+        'STEI Institut Teknologi Bandung (Pilihan 1) & FK UI (Pilihan 2)',
     'activePackage': 'Intensif Supercamp SNBT + Privat Fisika 1-on-1',
     'remainingSessions': 12,
     'totalSessions': 24,
@@ -61,7 +64,8 @@
     'role': 'Master Tutor',
     'id': 'TTR-0412-DIMAS',
     'name': 'Kak Dimas Prasetyo, S.Si.',
-    'specialization': 'Master Tutor Fisika & Penalaran Matematika (Alumnus ITB)',
+    'specialization':
+        'Master Tutor Fisika & Penalaran Matematika (Alumnus ITB)',
     'rating': 4.95,
     'totalReviews': 148,
     'activeStudents': 18,

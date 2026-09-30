@@ -69,7 +69,9 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     if (!mounted || submitted != true) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Permintaan terkirim. Tim Cakrawala akan menghubungi kamu.'),
+        content: Text(
+          'Permintaan terkirim. Tim Cakrawala akan menghubungi kamu.',
+        ),
         backgroundColor: AppColors.accentGreenDark,
       ),
     );
@@ -161,7 +163,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             _buildKeyMetricsBar(isDesktop),
             _buildPopularPackagesSection(isDesktop),
             _buildFeaturesComparison(isDesktop),
-            _buildAboutSection(isDesktop),
+            _buildAboutSection(),
             _buildTestimonialsSection(isDesktop),
             _buildCtaConsultationSection(context),
             _buildFooter(isDesktop),
@@ -182,9 +184,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
         icon: const Icon(Icons.chat_rounded),
         label: Text(
           'Chat Kami',
-          style: GoogleFonts.plusJakartaSans(
-            fontWeight: FontWeight.w700,
-          ),
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -1079,93 +1079,259 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     return Container(
       margin: const EdgeInsets.only(top: 48),
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
-      color: const Color(0xFFFFF8EE),
+      color: const Color(0xFFF2F7FC),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),
-          child: Column(
-            children: [
-              Text(
-                'Mengapa Ribuan Siswa Memilih Cakrawala Educentre?',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textHeading,
+          child: isDesktop
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 5, child: _buildCoveragePanel()),
+                    const SizedBox(width: 22),
+                    Expanded(flex: 7, child: _buildAdvantagesPanel()),
+                  ],
+                )
+              : Column(
+                  children: [
+                    _buildCoveragePanel(),
+                    const SizedBox(height: 20),
+                    _buildAdvantagesPanel(),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Kombinasi pendampingan personal, tutor berkualitas, dan teknologi belajar interaktif',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 36),
-              isDesktop
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: _buildValuePropCard(
-                            Icons.psychology_rounded,
-                            'Metode Belajar Personal',
-                            'Setiap anak unik. Materi dan kecepatan belajar disesuaikan dengan daya serap siswa tanpa paksaan.',
-                            AppColors.accentOrange,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: _buildValuePropCard(
-                            Icons.auto_stories_rounded,
-                            'Garansi Cocok Tutor',
-                            'Jika siswa merasa kurang cocok dengan metode mengajar tutor, kami siap mengganti tutor tanpa biaya tambahan.',
-                            AppColors.primaryBlue,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: _buildValuePropCard(
-                            Icons.mark_email_read_rounded,
-                            'Laporan Rapor ke Orang Tua',
-                            'Orang tua mendapat laporan catatan belajar langsung setiap sesi selesai, mencakup pemahaman bab & PR.',
-                            AppColors.accentGreen,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      children: [
-                        _buildValuePropCard(
-                          Icons.psychology_rounded,
-                          'Metode Belajar Personal',
-                          'Setiap anak unik. Kecepatan belajar disesuaikan dengan daya serap siswa.',
-                          AppColors.accentOrange,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildValuePropCard(
-                          Icons.auto_stories_rounded,
-                          'Garansi Cocok Tutor',
-                          'Bisa ganti guru jika gaya mengajar kurang cocok kapan saja.',
-                          AppColors.primaryBlue,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildValuePropCard(
-                          Icons.mark_email_read_rounded,
-                          'Laporan Rapor ke Orang Tua',
-                          'Update perkembangan anak dikirim langsung ke WhatsApp setiap selesai sesi.',
-                          AppColors.accentGreen,
-                        ),
-                      ],
-                    ),
-            ],
-          ),
         ),
       ),
     );
   }
+
+  Widget _buildCoveragePanel() {
+    const programAreas = [
+      'SD, SMP & SMA',
+      'TKA SD & SMP',
+      'Bahasa Indonesia',
+      'IPAS',
+      'English Club',
+      'Maths Club',
+      'UTBK',
+      'Kedinasan',
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFD9E7F4)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A1E3A8A),
+            blurRadius: 24,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionEyebrow('LAYANAN & PROGRAM'),
+          const SizedBox(height: 12),
+          Text(
+            'Cakupan Layanan',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textHeading,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Cakrawala menyediakan les privat akademik dan non-akademik dengan pilihan belajar online maupun offline. Ketersediaan pertemuan tatap muka mengikuti program dan lokasi siswa, jadi silakan konfirmasi terlebih dahulu.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              height: 1.65,
+              color: AppColors.textBody,
+            ),
+          ),
+          const SizedBox(height: 22),
+          Text(
+            'Program yang dipublikasikan',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textHeading,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: programAreas
+                .map(
+                  (program) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF6FC),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFC7EAF8)),
+                    ),
+                    child: Text(
+                      program,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF075985),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(13),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8EB),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.location_searching_rounded,
+                  color: AppColors.accentOrangeDark,
+                  size: 19,
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    'Untuk area les tatap muka, tim kami akan membantu mengecek ketersediaan tutor sesuai lokasi.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      height: 1.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textBody,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          OutlinedButton.icon(
+            onPressed: () => _showLeadDialog(source: 'landing_consultation'),
+            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
+            label: const Text('Tanyakan cakupan layanan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdvantagesPanel() {
+    final advantages = [
+      (
+        Icons.person_search_rounded,
+        'Pendampingan privat',
+        'Les privat untuk kebutuhan belajar yang lebih terarah.',
+        AppColors.accentOrange,
+      ),
+      (
+        Icons.devices_rounded,
+        'Online & offline',
+        'Pilih format belajar sesuai program dan kebutuhan.',
+        AppColors.primaryBlue,
+      ),
+      (
+        Icons.menu_book_rounded,
+        'Kurikulum beragam',
+        'Berfokus pada kurikulum Nasional dan Internasional.',
+        AppColors.accentGreen,
+      ),
+      (
+        Icons.school_rounded,
+        'Akademik & non-akademik',
+        'Layanan belajar mencakup kedua bidang tersebut.',
+        const Color(0xFF7C3AED),
+      ),
+      (
+        Icons.assignment_turned_in_rounded,
+        'Program persiapan ujian',
+        'Pilihan program TKA, UTBK, dan Kedinasan.',
+        const Color(0xFF0891B2),
+      ),
+      (
+        Icons.support_agent_rounded,
+        'Konsultasi program',
+        'Diskusikan pilihan program dan format kelas.',
+        const Color(0xFFDB2777),
+      ),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F7FC),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFCBEAF5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionEyebrow('KENALI CARA BELAJARNYA'),
+          const SizedBox(height: 12),
+          Text(
+            'Keunggulan Cakrawala Educentre',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textHeading,
+            ),
+          ),
+          const SizedBox(height: 20),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const spacing = 10.0;
+              final columns = constraints.maxWidth > 560 ? 3 : 2;
+              final cardWidth =
+                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: advantages
+                    .map(
+                      (item) => SizedBox(
+                        width: cardWidth,
+                        child: _buildValuePropCard(
+                          item.$1,
+                          item.$2,
+                          item.$3,
+                          item.$4,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionEyebrow(String text) => Text(
+    text,
+    style: GoogleFonts.plusJakartaSans(
+      fontSize: 10,
+      letterSpacing: 1.1,
+      fontWeight: FontWeight.w800,
+      color: AppColors.primaryBlue,
+    ),
+  );
 
   Widget _buildValuePropCard(
     IconData icon,
@@ -1214,11 +1380,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     );
   }
 
-  Widget _buildAboutSection(bool isDesktop) {
-    final mapUrl = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(BimbelConstants.operationalHeadquarters)}',
-    );
-
+  Widget _buildAboutSection() {
     return Container(
       key: _aboutSectionKey,
       width: double.infinity,
@@ -1227,148 +1389,114 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Tentang Kami',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textHeading,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColors.borderSubtle),
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0A1E3A8A),
+                  blurRadius: 24,
+                  offset: Offset(0, 8),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '${BimbelConstants.appName} adalah layanan bimbingan belajar dan les privat dari ${BimbelConstants.companyName}. Kami mendampingi siswa dari jenjang TK hingga persiapan UTBK melalui kelas privat, kelas kelompok, dan pendampingan belajar yang terarah.',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  height: 1.7,
-                  color: AppColors.textBody,
-                ),
-              ),
-              const SizedBox(height: 28),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  color: AppColors.bgCanvas,
-                  border: Border.all(color: AppColors.borderSubtle),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: isDesktop
-                    ? Row(
-                        children: [
-                          Expanded(child: _buildLocationDetails(mapUrl)),
-                          const SizedBox(width: 24),
-                          Expanded(child: _buildMapPreview(mapUrl)),
-                        ],
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLocationDetails(mapUrl),
-                          const SizedBox(height: 20),
-                          _buildMapPreview(mapUrl),
-                        ],
-                      ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLocationDetails(Uri mapUrl) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Icon(
-          Icons.location_on_rounded,
-          color: AppColors.accentOrange,
-          size: 28,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Kantor Operasional',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textHeading,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          BimbelConstants.operationalHeadquarters,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
-            height: 1.5,
-            color: AppColors.textBody,
-          ),
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: () =>
-              launchUrl(mapUrl, mode: LaunchMode.externalApplication),
-          icon: const Icon(Icons.map_outlined, size: 18),
-          label: const Text('Buka lokasi di Google Maps'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMapPreview(Uri mapUrl) {
-    return InkWell(
-      onTap: () => launchUrl(mapUrl, mode: LaunchMode.externalApplication),
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        height: 210,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE2E8F0),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderMedium),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: CustomPaint(painter: _MapGridPainter()),
-              ),
+              ],
             ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.location_pin,
-                  size: 48,
-                  color: AppColors.accentOrangeDark,
-                ),
+                _buildSectionEyebrow('PROFIL LEMBAGA'),
+                const SizedBox(height: 12),
                 Text(
-                  'Mustika Jaya, Bekasi',
+                  'Tentang Cakrawala Educentre',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
+                    fontSize: 26,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textHeading,
                   ),
                 ),
+                const SizedBox(height: 16),
                 Text(
-                  'Ketuk untuk melihat pencarian peta',
+                  'Cakrawala Educentre adalah merek layanan pendidikan di bawah naungan ${BimbelConstants.companyName}. Layanannya mencakup les privat akademik maupun non-akademik, dengan pilihan penyelenggaraan secara online dan offline. Cakrawala Educentre menyatakan fokus pada kurikulum Nasional dan Internasional.',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
+                    fontSize: 14,
+                    height: 1.8,
                     color: AppColors.textBody,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Program yang dipublikasikan meliputi TKA untuk SD dan SMP, Bahasa Indonesia, IPAS, English Club, Maths Club, UTBK, serta Kedinasan. Pilihan ini mencakup pendampingan untuk kebutuhan belajar sekolah dan persiapan seleksi. Siswa dan orang tua dapat berkonsultasi untuk mengetahui program, format kelas, serta ketersediaan tutor yang sesuai dengan lokasi dan jadwal.',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    height: 1.8,
+                    color: AppColors.textBody,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Wrap(
+                  spacing: 9,
+                  runSpacing: 9,
+                  children: [
+                    _buildAboutFact(
+                      Icons.business_rounded,
+                      BimbelConstants.companyName,
+                    ),
+                    _buildAboutFact(
+                      Icons.laptop_chromebook_rounded,
+                      'Online & offline',
+                    ),
+                    _buildAboutFact(
+                      Icons.menu_book_rounded,
+                      'Kurikulum Nasional & Internasional',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                TextButton.icon(
+                  onPressed: () => launchUrl(
+                    Uri.parse('https://cakrawalaeducentre.com/'),
+                    mode: LaunchMode.externalApplication,
+                  ),
+                  icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                  label: const Text('Lihat informasi di situs resmi'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primaryBlue,
+                    padding: EdgeInsets.zero,
                   ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _buildAboutFact(IconData icon, String text) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+    decoration: BoxDecoration(
+      color: const Color(0xFFF3F7FC),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: AppColors.primaryBlue),
+        const SizedBox(width: 7),
+        Text(
+          text,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textBody,
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildTestimonialsSection(bool isDesktop) {
     return Container(
@@ -1573,21 +1701,20 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                     const SizedBox(width: 28),
                     Expanded(
                       flex: 9,
-                      child: _buildFooterList('Wilayah Les Privat', [
-                        'Mustika Jaya, Kota Bekasi',
-                        'Tutor datang ke rumah siswa',
-                        'Les privat secara online',
-                        'Kelas online seluruh Indonesia',
+                      child: _buildFooterList('Area & format belajar', [
+                        'Kantor di Ciketing, Kota Bekasi',
+                        'Pilihan kelas online dan offline',
+                        'Cek area tatap muka ke konsultan',
                       ]),
                     ),
                     const SizedBox(width: 28),
                     Expanded(
                       flex: 9,
-                      child: _buildFooterList('Layanan', [
-                        'Les Privat 1-on-1',
-                        'Kelas Kelompok',
-                        'Program UTBK-SNBT',
-                        'TK, SD, SMP & SMA',
+                      child: _buildFooterList('Program', [
+                        'Les privat akademik & non-akademik',
+                        'TKA SD & SMP, Bahasa Indonesia, IPAS',
+                        'English Club & Maths Club',
+                        'UTBK & Kedinasan',
                       ]),
                     ),
                     const SizedBox(width: 28),
@@ -1600,18 +1727,17 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                   children: [
                     _buildFooterBrand(),
                     const SizedBox(height: 28),
-                    _buildFooterList('Wilayah Les Privat', [
-                      'Mustika Jaya, Kota Bekasi',
-                      'Tutor datang ke rumah siswa',
-                      'Les privat secara online',
-                      'Kelas online seluruh Indonesia',
+                    _buildFooterList('Area & format belajar', [
+                      'Kantor di Ciketing, Kota Bekasi',
+                      'Pilihan kelas online dan offline',
+                      'Cek area tatap muka ke konsultan',
                     ]),
                     const SizedBox(height: 24),
-                    _buildFooterList('Layanan', [
-                      'Les Privat 1-on-1',
-                      'Kelas Kelompok',
-                      'Program UTBK-SNBT',
-                      'TK, SD, SMP & SMA',
+                    _buildFooterList('Program', [
+                      'Les privat akademik & non-akademik',
+                      'TKA SD & SMP, Bahasa Indonesia, IPAS',
+                      'English Club & Maths Club',
+                      'UTBK & Kedinasan',
                     ]),
                     const SizedBox(height: 24),
                     _buildFooterLinks(mapUrl),
