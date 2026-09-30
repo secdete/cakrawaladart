@@ -11,9 +11,11 @@ import secrets
 import re
 import sqlite3
 import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from typing import Iterator
 from urllib.parse import parse_qs, urlparse
 from uuid import uuid4
 
@@ -86,22 +88,24 @@ SAMPLE_TRYOUT_QUESTION = {
 }
 
 
-def connect_database() -> sqlite3.Connection:
+@contextmanager
+def connect_database() -> Iterator[sqlite3.Connection]:
     database_path = Path(DATABASE_PATH)
     database_path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(database_path, timeout=10)
     connection.row_factory = sqlite3.Row
-    connection.execute("PRAGMA journal_mode=WAL")
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS programs (
+    try:
+        connection.execute("PRAGMA journal_mode=WAL")
+        connection.execute(
+            """CREATE TABLE IF NOT EXISTS programs (
                id TEXT PRIMARY KEY,
                grade_level TEXT NOT NULL,
                grades_json TEXT NOT NULL,
                data_json TEXT NOT NULL,
                active INTEGER NOT NULL DEFAULT 1
            )"""
-    )
-    connection.executescript(
+            )
+        connection.executescript(
         """
         CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, password_salt TEXT NOT NULL,
@@ -134,8 +138,8 @@ def connect_database() -> sqlite3.Connection:
           selected_index INTEGER NOT NULL, is_correct INTEGER NOT NULL, created_at TEXT NOT NULL
         );
         """
-    )
-    connection.execute(
+            )
+        connection.execute(
         """CREATE TABLE IF NOT EXISTS leads (
                id TEXT PRIMARY KEY,
                name TEXT NOT NULL,
@@ -150,23 +154,29 @@ def connect_database() -> sqlite3.Connection:
                created_at TEXT NOT NULL,
                status TEXT NOT NULL DEFAULT 'new'
            )"""
-    )
-    connection.commit()
-    question_columns = {row["name"] for row in connection.execute("PRAGMA table_info(student_questions)").fetchall()}
-    if "tutor_reply" not in question_columns:
-        connection.execute("ALTER TABLE student_questions ADD COLUMN tutor_reply TEXT NOT NULL DEFAULT ''")
+            )
         connection.commit()
-    lead_columns = {
-        row["name"] for row in connection.execute("PRAGMA table_info(leads)").fetchall()
-    }
-    if "consent" not in lead_columns:
-        connection.execute("ALTER TABLE leads ADD COLUMN consent INTEGER NOT NULL DEFAULT 0")
-    if "consent_at" not in lead_columns:
-        connection.execute("ALTER TABLE leads ADD COLUMN consent_at TEXT")
-    connection.commit()
-    seed_programs(connection)
-    seed_portal(connection)
-    return connection
+        question_columns = {row["name"] for row in connection.execute("PRAGMA table_info(student_questions)").fetchall()}
+        if "tutor_reply" not in question_columns:
+            connection.execute("ALTER TABLE student_questions ADD COLUMN tutor_reply TEXT NOT NULL DEFAULT ''")
+            connection.commit()
+        lead_columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(leads)").fetchall()
+        }
+        if "consent" not in lead_columns:
+            connection.execute("ALTER TABLE leads ADD COLUMN consent INTEGER NOT NULL DEFAULT 0")
+        if "consent_at" not in lead_columns:
+            connection.execute("ALTER TABLE leads ADD COLUMN consent_at TEXT")
+        connection.commit()
+        seed_programs(connection)
+        seed_portal(connection)
+        yield connection
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
 
 
 def _now() -> datetime:
@@ -517,7 +527,8 @@ class ApiHandler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    connect_database().close()
+    with connect_database():
+        pass
     host = os.environ.get("HOST", "127.0.0.1")
     port = int(os.environ.get("PORT", "8000"))
     server = ThreadingHTTPServer((host, port), ApiHandler)
