@@ -7,6 +7,7 @@ import '../../../core/widgets/bimbel_logo.dart';
 import '../../parent/screens/parent_monitoring_screen.dart';
 import '../../student/screens/student_dashboard_screen.dart';
 import '../../tutor/screens/tutor_dashboard_screen.dart';
+import '../../admin/screens/admin_dashboard_screen.dart';
 import '../../../core/services/portal_api_service.dart';
 
 class BimbelLoginScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
     BimbelConstants.demoStudent,
     BimbelConstants.demoParent,
     BimbelConstants.demoTutor,
+    {'email': 'admin@cakrawalaeducentre.com', 'password': 'cakrawala2026', 'role': 'admin'},
   ];
 
   Map<String, dynamic>? get _recognizedAccount {
@@ -95,6 +97,11 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const TutorDashboardScreen()),
+        );
+      } else if (role == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
         );
       } else {
         await PortalApiService.instance.logout();
@@ -470,6 +477,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
               _demoChip('Akun Siswa', _accounts[0]),
               _demoChip('Akun Orang Tua', _accounts[1]),
               _demoChip('Akun Tutor', _accounts[2]),
+              _demoChip('Akun Admin', _accounts[3]),
             ],
           ),
         ],

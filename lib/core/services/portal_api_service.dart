@@ -47,7 +47,8 @@ class PortalApiService {
     final data = Map<String, dynamic>.from(decoded as Map);
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(
-        data['error'] ?? 'Permintaan gagal (${response.statusCode}).',
+        '${data['error'] ?? 'Permintaan gagal (${response.statusCode}).'} '
+        '(${response.statusCode} ${method == 'POST' ? 'POST' : 'GET'} $uri)',
       );
     }
     return data;

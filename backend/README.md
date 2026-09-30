@@ -35,7 +35,7 @@ Untuk HP fisik, gunakan IP LAN komputer sebagai `API_BASE_URL` (contoh `http://1
 - `POST /api/leads` — simpan permintaan konsultasi/minat paket. Wajib mengirim nama, nomor WhatsApp, jenjang, sumber, dan `consent: true`.
 - `GET /api/admin/leads` — daftar permintaan; wajib header `Authorization: Bearer <ADMIN_API_TOKEN>`.
 - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/me` — email/password login, bearer session, and server-provided role.
-- `GET /api/student/dashboard`, `/api/parent/dashboard`, `/api/tutor/dashboard` — separate dashboards protected by role.
+- `GET /api/student/dashboard`, `/api/parent/dashboard`, `/api/tutor/dashboard`, `/api/admin/dashboard` — separate dashboards protected by role. Admin dashboard returns the lead list.
 - `POST /api/student/questions`; tutors assigned to the student reply with `POST /api/tutor/questions/{id}/reply`.
 - `GET /api/tryouts/sample/question`, `POST /api/tryouts/sample/answer` — answer key stays server-side and attempts are persisted.
 - `POST /api/tutor/notes` — persist learning notes for parents; only the assigned tutor can write them.
@@ -48,6 +48,9 @@ The database seeds demo accounts on first startup. Demo password: `cakrawala2026
 | Student | `farhan.arya@gmail.com` |
 | Parent | `rina.kusuma@gmail.com` |
 | Tutor | `dimas.prasetyo@cakrawalaeducentre.com` |
+| Admin | `admin@cakrawalaeducentre.com` |
+
+Password demo untuk semua akun: `cakrawala2026`. Untuk mengganti kredensial admin sebelum database pertama kali dibuat, atur `ADMIN_LOGIN_EMAIL` dan `ADMIN_LOGIN_PASSWORD`. Akun admin demo dibuat saat backend pertama kali membuka database.
 Sumber lead yang diterima: `landing_consultation`, `hero_consultation`, dan `package_interest`. Permintaan publik divalidasi, ukuran body dibatasi, dan dibatasi enam pengiriman per alamat IP per sepuluh menit.
 
 Contoh mengatur token admin di PowerShell:
@@ -57,7 +60,7 @@ $env:ADMIN_API_TOKEN = 'ganti-dengan-token-rahasia'
 python backend/server.py
 ```
 
-Untuk deployment, set `PORT`, `DATABASE_PATH`, `ADMIN_API_TOKEN`, dan `CORS_ORIGINS` pada host backend. Atur `API_BASE_URL` saat build web ke URL backend HTTPS yang dipublikasikan. SQLite cocok untuk satu instance dengan persistent disk; gunakan PostgreSQL sebelum menjalankan beberapa instance.
+Untuk deployment, ganti kredensial admin demo dengan `ADMIN_LOGIN_EMAIL` dan `ADMIN_LOGIN_PASSWORD`, lalu set `PORT`, `DATABASE_PATH`, `ADMIN_API_TOKEN`, dan `CORS_ORIGINS` pada host backend. Atur `API_BASE_URL` saat build web ke URL backend HTTPS yang dipublikasikan. SQLite cocok untuk satu instance dengan persistent disk; gunakan PostgreSQL sebelum menjalankan beberapa instance.
 
 ## Tes API
 
