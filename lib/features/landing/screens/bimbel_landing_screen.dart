@@ -1079,29 +1079,25 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
 
   Widget _buildFeaturesComparison(bool isDesktop) {
     return Container(
-      margin: const EdgeInsets.only(top: 24),
-      padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 24),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF8FAFC),
-      ),
+      margin: const EdgeInsets.only(top: 48),
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
+      color: const Color(0xFFF2F7FC),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
+          constraints: const BoxConstraints(maxWidth: 1100),
           child: isDesktop
-              ? IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(flex: 5, child: _buildCoveragePanel()),
-                      const SizedBox(width: 32),
-                      Expanded(flex: 7, child: _buildAdvantagesPanel()),
-                    ],
-                  ),
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 5, child: _buildCoveragePanel()),
+                    const SizedBox(width: 22),
+                    Expanded(flex: 7, child: _buildAdvantagesPanel()),
+                  ],
                 )
               : Column(
                   children: [
                     _buildCoveragePanel(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 20),
                     _buildAdvantagesPanel(),
                   ],
                 ),
@@ -1124,146 +1120,113 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E3A8A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFD9E7F4)),
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0xFF1E3A8A).withValues(alpha: 0.25),
-            blurRadius: 40,
-            offset: const Offset(0, 20),
+            color: Color(0x0A1E3A8A),
+            blurRadius: 24,
+            offset: Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              'LAYANAN & PROGRAM',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF60A5FA),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
+          _buildSectionEyebrow('LAYANAN & PROGRAM'),
+          const SizedBox(height: 12),
           Text(
             'Cakupan Layanan',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 32,
+              fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
-              height: 1.2,
+              color: AppColors.textHeading,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Text(
-            'Cakrawala menyediakan les privat akademik dan non-akademik dengan pilihan belajar online maupun offline. Ketersediaan pertemuan tatap muka mengikuti program dan lokasi siswa.',
+            'Cakrawala menyediakan les privat akademik dan non-akademik dengan pilihan belajar online maupun offline. Ketersediaan pertemuan tatap muka mengikuti program dan lokasi siswa, jadi silakan konfirmasi terlebih dahulu.',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 15,
-              height: 1.7,
-              color: const Color(0xFFCBD5E1),
+              fontSize: 13,
+              height: 1.65,
+              color: AppColors.textBody,
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 22),
           Text(
-            'Program yang dipublikasikan:',
+            'Program yang dipublikasikan',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textHeading,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: 8,
+            runSpacing: 8,
             children: programAreas
                 .map(
                   (program) => Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
+                      horizontal: 10,
+                      vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                      color: const Color(0xFFEAF6FC),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFC7EAF8)),
                     ),
                     child: Text(
                       program,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFE0F2FE),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF075985),
                       ),
                     ),
                   ),
                 )
                 .toList(),
           ),
-          const Spacer(),
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(13),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
+              color: const Color(0xFFFFF8EB),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(
-                  Icons.info_outline_rounded,
-                  color: Color(0xFF60A5FA),
-                  size: 24,
+                  Icons.location_searching_rounded,
+                  color: AppColors.accentOrangeDark,
+                  size: 19,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 9),
                 Expanded(
                   child: Text(
                     'Untuk area les tatap muka, tim kami akan membantu mengecek ketersediaan tutor sesuai lokasi.',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
+                      fontSize: 11,
                       height: 1.5,
-                      color: const Color(0xFFCBD5E1),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textBody,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _showLeadDialog(source: 'landing_consultation'),
-              icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
-              label: const Text('Tanyakan cakupan layanan'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF0F172A),
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                textStyle: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+          const SizedBox(height: 18),
+          OutlinedButton.icon(
+            onPressed: () => _showLeadDialog(source: 'landing_consultation'),
+            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
+            label: const Text('Tanyakan cakupan layanan'),
           ),
         ],
       ),
@@ -1276,61 +1239,66 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
         Icons.person_search_rounded,
         'Pendampingan privat',
         'Les privat untuk kebutuhan belajar yang lebih terarah.',
-        const Color(0xFFF59E0B),
+        AppColors.accentOrange,
       ),
       (
         Icons.devices_rounded,
         'Online & offline',
         'Pilih format belajar sesuai program dan kebutuhan.',
-        const Color(0xFF3B82F6),
+        AppColors.primaryBlue,
       ),
       (
         Icons.menu_book_rounded,
         'Kurikulum beragam',
         'Berfokus pada kurikulum Nasional dan Internasional.',
-        const Color(0xFF10B981),
+        AppColors.accentGreen,
       ),
       (
         Icons.school_rounded,
         'Akademik & non-akademik',
         'Layanan belajar mencakup kedua bidang tersebut.',
-        const Color(0xFF8B5CF6),
+        const Color(0xFF7C3AED),
       ),
       (
         Icons.assignment_turned_in_rounded,
-        'Persiapan ujian',
+        'Program persiapan ujian',
         'Pilihan program TKA, UTBK, dan Kedinasan.',
-        const Color(0xFF06B6D4),
+        const Color(0xFF0891B2),
       ),
       (
         Icons.support_agent_rounded,
         'Konsultasi program',
         'Diskusikan pilihan program dan format kelas.',
-        const Color(0xFFEC4899),
+        const Color(0xFFDB2777),
       ),
     ];
 
-    return SizedBox(
+    return Container(
       width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F7FC),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFCBEAF5)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionEyebrow('KENALI CARA BELAJARNYA'),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           Text(
             'Keunggulan Cakrawala Educentre',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 32,
+              fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF0F172A),
-              height: 1.2,
+              color: AppColors.textHeading,
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
           LayoutBuilder(
             builder: (context, constraints) {
-              const spacing = 16.0;
-              final columns = constraints.maxWidth > 560 ? 2 : 1;
+              const spacing = 10.0;
+              final columns = constraints.maxWidth > 560 ? 3 : 2;
               final cardWidth =
                   (constraints.maxWidth - spacing * (columns - 1)) / columns;
               return Wrap(
@@ -1357,20 +1325,13 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     );
   }
 
-  Widget _buildSectionEyebrow(String text) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    decoration: BoxDecoration(
-      color: AppColors.primaryBlue.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(30),
-    ),
-    child: Text(
-      text,
-      style: GoogleFonts.plusJakartaSans(
-        fontSize: 12,
-        letterSpacing: 1.2,
-        fontWeight: FontWeight.w800,
-        color: AppColors.primaryBlue,
-      ),
+  Widget _buildSectionEyebrow(String text) => Text(
+    text,
+    style: GoogleFonts.plusJakartaSans(
+      fontSize: 10,
+      letterSpacing: 1.1,
+      fontWeight: FontWeight.w800,
+      color: AppColors.primaryBlue,
     ),
   );
 
@@ -1381,62 +1342,39 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     Color accentColor,
   ) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: accentColor.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        color: AppColors.bgCanvas,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [accentColor.withValues(alpha: 0.2), accentColor.withValues(alpha: 0.1)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
+              color: accentColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: accentColor, size: 28),
+            child: Icon(icon, color: accentColor, size: 24),
           ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  desc,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    color: const Color(0xFF475569),
-                    height: 1.5,
-                  ),
-                ),
-              ],
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textHeading,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            desc,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: AppColors.textBody,
+              height: 1.5,
             ),
           ),
         ],
