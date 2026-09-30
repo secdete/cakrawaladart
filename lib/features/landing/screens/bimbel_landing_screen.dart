@@ -18,6 +18,7 @@ class BimbelLandingScreen extends StatefulWidget {
 }
 
 class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
+  static const _ceoImageAsset = 'assets/images/ceo_cakrawala.jpg';
   String _selectedGradeFilter = 'SMA - Kelas 12';
   final _api = LandingApiService();
   late Future<List<BimbelProgram>> _programsFuture;
@@ -164,6 +165,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             _buildPopularPackagesSection(isDesktop),
             _buildFeaturesComparison(isDesktop),
             _buildAboutSection(),
+            _buildCeoSection(),
             _buildTestimonialsSection(isDesktop),
             _buildCtaConsultationSection(context),
             _buildFooter(isDesktop),
@@ -1497,6 +1499,105 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
       ],
     ),
   );
+
+  Widget _buildCeoSection() {
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 24),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth >= 760;
+              final photo = AspectRatio(
+                aspectRatio: 4 / 5,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    _ceoImageAsset,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                    semanticLabel: 'CEO Cakrawala Educentre',
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: const Color(0xFFE8EEF7),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.person_rounded,
+                        size: 72,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+              final message = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionEyebrow('PESAN DARI CEO'),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Tumbuh bersama potensi terbaik setiap anak.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: isWide ? 28 : 24,
+                      height: 1.25,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textHeading,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Sebagai CEO Cakrawala Educentre, saya percaya setiap anak memiliki potensi yang perlu pendampingan belajar yang tepat. Kami hadir sebagai mitra orang tua untuk mendampingi tumbuh kembang anak melalui layanan yang personal, profesional, dan bermakna.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15,
+                      height: 1.8,
+                      color: AppColors.textBody,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    width: 46,
+                    height: 3,
+                    color: AppColors.accentOrange,
+                  ),
+                  const SizedBox(height: 13),
+                  Text(
+                    'CEO Cakrawala Educentre',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                ],
+              );
+
+              if (!isWide) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 240, child: photo),
+                    const SizedBox(height: 30),
+                    message,
+                  ],
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(width: 330, child: photo),
+                  const SizedBox(width: 72),
+                  Expanded(child: message),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildTestimonialsSection(bool isDesktop) {
     return Container(
