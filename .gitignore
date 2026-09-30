@@ -35,6 +35,9 @@ migrate_working_dir/
 /backend/data/*.sqlite3
 /backend/data/*.sqlite3-*
 /backend/__pycache__/
+/backend/node_modules/
+/backend/build/
+/backend/.env
 
 # Symbolication related
 app.*.symbols

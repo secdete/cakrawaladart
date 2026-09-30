@@ -1,0 +1,29 @@
+{
+  "name": "cakrawala-educentre-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cakrawala Educentre HTTP API",
+  "main": "server.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "tsx server.ts",
+    "dev": "tsx watch server.ts",
+    "migrate:sqlite": "tsx migrate-sqlite.ts",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "dotenv": "^16.6.1",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.5",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

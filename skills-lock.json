@@ -31,6 +31,18 @@
       "skillPath": "skills/qa-tester/SKILL.md",
       "computedHash": "ce82eeecbc546ba1f966ab58339a638a2a510eea8a2ba91517b7d172666399a9"
     },
+    "supabase": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase/SKILL.md",
+      "computedHash": "2efca3570897e9c22c0788f3a0372a649797c8bd973e4ba5fc1ed1a1c5ef39d5"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
+      "computedHash": "128fac78002d916c8ca908245d398e634f540d8bcf20915b2b2359aeb18eba59"
+    },
     "task-planner": {
       "source": "ajianaz/skills-collection",
       "sourceType": "github",
