@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../landing/screens/bimbel_landing_screen.dart';
 import '../../tryout/screens/tryout_portal_screen.dart';
+import '../../../core/services/portal_api_service.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
@@ -16,94 +17,60 @@ class StudentDashboardScreen extends StatefulWidget {
 }
 
 class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
+  List<LiveSession> _sessions = LiveSession.dummySessions;
   void _showTanyaPrDialog() {
-    showDialog(
+    final controller = TextEditingController();
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.camera_alt_rounded, color: AppColors.primaryBlue),
-            const SizedBox(width: 8),
-            Text(
-              'Klinik PR & Tanya Soal',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Klinik PR & Tanya Soal'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Ada PR atau soal UTBK yang susah? Foto soalnya dan kirim, Master Tutor Cakrawala akan memberikan pembahasan konsep lengkap step-by-step.',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                color: AppColors.textBody,
-                height: 1.45,
-              ),
+            const Text(
+              'Ketik pertanyaanmu. Pertanyaan akan masuk ke antrean tutor.',
             ),
-            const SizedBox(height: 16),
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.bgSubtle,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.3),
-                  style: BorderStyle.solid,
-                ),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.cloud_upload_outlined,
-                      size: 36,
-                      color: AppColors.primaryBlue,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Pilih Gambar Foto Soal / Ketik Pertanyaan',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              minLines: 3,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                hintText: 'Tulis soal atau pertanyaan',
+                border: OutlineInputBorder(),
               ),
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Batal'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Soal berhasil dikirim ke Master Tutor! Notifikasi pembahasan akan segera masuk.',
+          FilledButton(
+            onPressed: () async {
+              try {
+                await PortalApiService.instance.sendQuestion(controller.text);
+                if (!mounted || !dialogContext.mounted) return;
+                Navigator.pop(dialogContext);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Pertanyaan tersimpan dan masuk ke antrean tutor.',
+                    ),
                   ),
-                  backgroundColor: AppColors.accentGreenDark,
-                ),
-              );
+                );
+              } catch (error) {
+                if (mounted && dialogContext.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(error.toString())));
+                }
+              } finally {
+                controller.dispose();
+              }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlue,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Kirim Soal'),
+            child: const Text('Kirim soal'),
           ),
         ],
       ),
@@ -113,7 +80,24 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width >= 900;
-    final student = BimbelConstants.demoStudent;
+    final api = PortalApiService.instance;
+    final student = <String, dynamic>{
+      ...BimbelConstants.demoStudent,
+      ...?api.user,
+    };
+    final dashboard = api.lastDashboard;
+    if (dashboard != null && dashboard['sessions'] is List) {
+      _sessions = (dashboard['sessions'] as List)
+          .map(
+            (item) =>
+                LiveSession.fromJson(Map<String, dynamic>.from(item as Map)),
+          )
+          .toList();
+    }
+    final answeredQuestions = (dashboard?['questions'] as List? ?? const [])
+        .where((item) => (item as Map)['reply']?.toString().isNotEmpty == true)
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -128,12 +112,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               color: AppColors.textSecondary,
             ),
             tooltip: 'Keluar ke Beranda',
-            onPressed: () {
-              Navigator.pushReplacement(
+            onPressed: () async {
+              await PortalApiService.instance.logout();
+              if (!context.mounted) return;
+              Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const BimbelLandingScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const BimbelLandingScreen()),
+                (_) => false,
               );
             },
           ),
@@ -155,6 +140,29 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 const SizedBox(height: 24),
                 _buildActiveSessionBanner(context, isDesktop),
                 const SizedBox(height: 24),
+                if (answeredQuestions.isNotEmpty) ...[
+                  Text(
+                    'Balasan tutor',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ...answeredQuestions.map(
+                    (item) => Card(
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.mark_chat_read_outlined,
+                          color: AppColors.primaryBlue,
+                        ),
+                        title: Text(item['question'] as String),
+                        subtitle: Text(item['reply'] as String),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 _buildQuickActionGrid(context, isDesktop),
                 const SizedBox(height: 24),
                 _buildLearningProgressAndTryouts(context, isDesktop),
@@ -374,7 +382,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   }
 
   Widget _buildActiveSessionBanner(BuildContext context, bool isDesktop) {
-    final session = LiveSession.dummySessions.first;
+    final session = _sessions.isEmpty
+        ? LiveSession.dummySessions.first
+        : _sessions.first;
 
     return Container(
       padding: const EdgeInsets.all(20),

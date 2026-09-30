@@ -1,11 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/bimbel_constants.dart';
 import '../../../core/models/tutor_note.dart';
+import '../../../core/services/portal_api_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../landing/screens/bimbel_landing_screen.dart';
-import '../../student/screens/student_dashboard_screen.dart';
 
 class ParentMonitoringScreen extends StatelessWidget {
   const ParentMonitoringScreen({super.key});
@@ -13,8 +13,15 @@ class ParentMonitoringScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width >= 900;
-    final parent = BimbelConstants.demoParent;
-    final notes = TutorNote.dummyNotes;
+    final parent = <String, dynamic>{
+      ...BimbelConstants.demoParent,
+      ...?PortalApiService.instance.user,
+    };
+    final rawNotes =
+        PortalApiService.instance.lastDashboard?['notes'] as List? ?? const [];
+    final notes = rawNotes
+        .map((e) => TutorNote.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -23,33 +30,18 @@ class ParentMonitoringScreen extends StatelessWidget {
         elevation: 0,
         title: const BimbelLogo(size: 34),
         actions: [
-          TextButton.icon(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const StudentDashboardScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.school_rounded, size: 18),
-            label: Text(
-              'Mode Siswa',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryBlue,
-              ),
-            ),
-          ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
-            onPressed: () {
-              Navigator.pushReplacement(
+            icon: const Icon(
+              Icons.logout_rounded,
+              color: AppColors.textSecondary,
+            ),
+            onPressed: () async {
+              await PortalApiService.instance.logout();
+              if (!context.mounted) return;
+              Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const BimbelLandingScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const BimbelLandingScreen()),
+                (_) => false,
               );
             },
           ),
@@ -82,7 +74,11 @@ class ParentMonitoringScreen extends StatelessWidget {
                       const CircleAvatar(
                         radius: 32,
                         backgroundColor: Color(0xFF10B981),
-                        child: Icon(Icons.family_restroom_rounded, color: Colors.white, size: 30),
+                        child: Icon(
+                          Icons.family_restroom_rounded,
+                          color: Colors.white,
+                          size: 30,
+                        ),
                       ),
                       const SizedBox(width: 18),
                       Expanded(
@@ -157,7 +153,10 @@ class ParentMonitoringScreen extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.accentGreenLight,
                         borderRadius: BorderRadius.circular(6),
@@ -178,7 +177,8 @@ class ParentMonitoringScreen extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: notes.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     final note = notes[index];
                     return Container(
@@ -222,11 +222,20 @@ class ParentMonitoringScreen extends StatelessWidget {
                             ),
                           ),
                           const Divider(height: 20),
-                          _buildNoteDetailRow('Materi Dipelajari', note.topicCovered),
+                          _buildNoteDetailRow(
+                            'Materi Dipelajari',
+                            note.topicCovered,
+                          ),
                           const SizedBox(height: 8),
-                          _buildNoteDetailRow('Tingkat Pemahaman Anak', note.studentComprehension),
+                          _buildNoteDetailRow(
+                            'Tingkat Pemahaman Anak',
+                            note.studentComprehension,
+                          ),
                           const SizedBox(height: 8),
-                          _buildNoteDetailRow('Latihan PR Rumah', note.homeworkAssigned),
+                          _buildNoteDetailRow(
+                            'Latihan PR Rumah',
+                            note.homeworkAssigned,
+                          ),
                           const SizedBox(height: 12),
                           Container(
                             padding: const EdgeInsets.all(12),
@@ -237,7 +246,11 @@ class ParentMonitoringScreen extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.primaryBlue),
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 18,
+                                  color: AppColors.primaryBlue,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(

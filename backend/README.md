@@ -34,7 +34,20 @@ Untuk HP fisik, gunakan IP LAN komputer sebagai `API_BASE_URL` (contoh `http://1
 - `GET /api/programs?grade=SMA%20-%20Kelas%2012` — filter paket sesuai jenjang.
 - `POST /api/leads` — simpan permintaan konsultasi/minat paket. Wajib mengirim nama, nomor WhatsApp, jenjang, sumber, dan `consent: true`.
 - `GET /api/admin/leads` — daftar permintaan; wajib header `Authorization: Bearer <ADMIN_API_TOKEN>`.
+- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/me` — email/password login, bearer session, and server-provided role.
+- `GET /api/student/dashboard`, `/api/parent/dashboard`, `/api/tutor/dashboard` — separate dashboards protected by role.
+- `POST /api/student/questions`; tutors assigned to the student reply with `POST /api/tutor/questions/{id}/reply`.
+- `GET /api/tryouts/sample/question`, `POST /api/tryouts/sample/answer` — answer key stays server-side and attempts are persisted.
+- `POST /api/tutor/notes` — persist learning notes for parents; only the assigned tutor can write them.
+- `PATCH /api/tutor/sessions/{id}` — tutor can update a session to `Selesai` or `Dibatalkan`.
 
+The database seeds demo accounts on first startup. Demo password: `cakrawala2026`.
+
+| Role | Email |
+| --- | --- |
+| Student | `farhan.arya@gmail.com` |
+| Parent | `rina.kusuma@gmail.com` |
+| Tutor | `dimas.prasetyo@cakrawalaeducentre.com` |
 Sumber lead yang diterima: `landing_consultation`, `hero_consultation`, dan `package_interest`. Permintaan publik divalidasi, ukuran body dibatasi, dan dibatasi enam pengiriman per alamat IP per sepuluh menit.
 
 Contoh mengatur token admin di PowerShell:

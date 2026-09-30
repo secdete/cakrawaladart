@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
+import '../../../core/services/portal_api_service.dart';
 
 class TryoutPortalScreen extends StatefulWidget {
   const TryoutPortalScreen({super.key});
@@ -14,29 +15,68 @@ class _TryoutPortalScreenState extends State<TryoutPortalScreen> {
   int? _selectedAnswer;
   bool _isAnswerSubmitted = false;
 
-  final Map<String, dynamic> _sampleQuestion = {
-    'subtest': 'Penalaran Matematika & TPS Kuantitatif (UTBK-SNBT)',
-    'question':
-        'Sebuah balok es terapung di permukaan air laut. Jika diketahui massa jenis es adalah 0,9 g/cm³ dan massa jenis air laut adalah 1,03 g/cm³, berapakah persentase volume es yang tercelup di dalam air laut?',
-    'options': [
-      'A. 87,4%',
-      'B. 82,5%',
-      'C. 90,0%',
-      'D. 75,2%',
-      'E. 92,6%',
-    ],
-    'correctIndex': 0,
-    'explanation':
-        'Berdasarkan Hukum Archimedes, benda terapung memenuhi:\n'
-        'F_apung = W_benda\n'
-        'ρ_cairan × V_tercelup × g = ρ_benda × V_total × g\n'
-        'V_tercelup / V_total = ρ_benda / ρ_cairan = 0,9 / 1,03 ≈ 0,87378 = 87,4%.\n'
-        'Jadi, volume es yang tercelup di dalam air adalah sekitar 87,4%.',
-  };
+  Map<String, dynamic> _sampleQuestion = {};
+  int? _correctIndex;
+  String _explanation = '';
+  bool _loading = true;
+  String? _loadError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuestion();
+  }
+
+  Future<void> _loadQuestion() async {
+    try {
+      final result = await PortalApiService.instance.fetchQuestion();
+      if (!mounted) return;
+      setState(() {
+        _sampleQuestion = Map<String, dynamic>.from(result['question'] as Map);
+        _loading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loadError = '$e';
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _submitAnswer() async {
+    if (_selectedAnswer == null) return;
+    try {
+      final result = await PortalApiService.instance.answerQuestion(
+        _selectedAnswer!,
+      );
+      if (!mounted) return;
+      setState(() {
+        _isAnswerSubmitted = true;
+        _correctIndex = result['correctIndex'] as int;
+        _explanation = result['explanation'] as String;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width >= 900;
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_loadError != null) {
+      return Scaffold(
+        body: Center(child: Text('Gagal memuat soal: $_loadError')),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -54,7 +94,11 @@ class _TryoutPortalScreenState extends State<TryoutPortalScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.timer_outlined, size: 16, color: Color(0xFFB45309)),
+                const Icon(
+                  Icons.timer_outlined,
+                  size: 16,
+                  color: Color(0xFFB45309),
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Sisa Waktu: 48:20 Menit',
@@ -163,10 +207,11 @@ class _TryoutPortalScreenState extends State<TryoutPortalScreen> {
                           final opt = _sampleQuestion['options'][index];
                           final isSelected = _selectedAnswer == index;
                           final isCorrect =
-                              _isAnswerSubmitted && index == _sampleQuestion['correctIndex'];
-                          final isWrongSelected = _isAnswerSubmitted &&
+                              _isAnswerSubmitted && index == _correctIndex;
+                          final isWrongSelected =
+                              _isAnswerSubmitted &&
                               isSelected &&
-                              index != _sampleQuestion['correctIndex'];
+                              index != _correctIndex;
 
                           Color borderColor = AppColors.borderSubtle;
                           Color bgColor = Colors.white;
@@ -179,7 +224,9 @@ class _TryoutPortalScreenState extends State<TryoutPortalScreen> {
                             bgColor = const Color(0xFFFEE2E2);
                           } else if (isSelected) {
                             borderColor = AppColors.primaryBlue;
-                            bgColor = AppColors.accentCyanLight.withValues(alpha: 0.3);
+                            bgColor = AppColors.accentCyanLight.withValues(
+                              alpha: 0.3,
+                            );
                           }
 
                           return Padding(
@@ -201,7 +248,10 @@ class _TryoutPortalScreenState extends State<TryoutPortalScreen> {
                                 decoration: BoxDecoration(
                                   color: bgColor,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: borderColor, width: 1.5),
+                                  border: Border.all(
+                                    color: borderColor,
+                                    width: 1.5,
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
@@ -209,17 +259,20 @@ class _TryoutPortalScreenState extends State<TryoutPortalScreen> {
                                       isCorrect
                                           ? Icons.check_circle_rounded
                                           : (isWrongSelected
-                                              ? Icons.cancel_rounded
-                                              : (isSelected
-                                                  ? Icons.radio_button_checked_rounded
-                                                  : Icons.radio_button_off_rounded)),
+                                                ? Icons.cancel_rounded
+                                                : (isSelected
+                                                      ? Icons
+                                                            .radio_button_checked_rounded
+                                                      : Icons
+                                                            .radio_button_off_rounded)),
                                       color: isCorrect
                                           ? const Color(0xFF10B981)
                                           : (isWrongSelected
-                                              ? const Color(0xFFEF4444)
-                                              : (isSelected
-                                                  ? AppColors.primaryBlue
-                                                  : AppColors.textSecondary)),
+                                                ? const Color(0xFFEF4444)
+                                                : (isSelected
+                                                      ? AppColors.primaryBlue
+                                                      : AppColors
+                                                            .textSecondary)),
                                       size: 20,
                                     ),
                                     const SizedBox(width: 12),
@@ -248,13 +301,11 @@ class _TryoutPortalScreenState extends State<TryoutPortalScreen> {
                         ElevatedButton.icon(
                           onPressed: _selectedAnswer == null
                               ? null
-                              : () {
-                                  setState(() {
-                                    _isAnswerSubmitted = true;
-                                  });
-                                },
+                              : _submitAnswer,
                           icon: const Icon(Icons.check_rounded, size: 18),
-                          label: const Text('Kunci Jawaban & Cek Pembahasan IRT'),
+                          label: const Text(
+                            'Kunci Jawaban & Cek Pembahasan IRT',
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryBlue,
                             foregroundColor: Colors.white,
@@ -298,7 +349,7 @@ class _TryoutPortalScreenState extends State<TryoutPortalScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                _sampleQuestion['explanation'],
+                                _explanation,
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13,
                                   color: const Color(0xFF14532D),

@@ -1,4 +1,4 @@
-﻿class LiveSession {
+class LiveSession {
   final String id;
   final String title;
   final String subject;
@@ -25,45 +25,59 @@
     required this.topic,
   });
 
+  factory LiveSession.fromJson(Map<String, dynamic> json) => LiveSession(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    subject: json['subject'] as String,
+    tutorName: json['tutorName'] as String,
+    tutorTitle: json['tutorTitle'] as String,
+    dateTimeFormatted: json['dateTimeFormatted'] as String,
+    timeRange: json['timeRange'] as String,
+    type: json['type'] as String,
+    status: json['status'] as String,
+    meetLink: json['meetLink'] as String,
+    topic: json['topic'] as String,
+  );
+
   static List<LiveSession> get dummySessions => [
-        const LiveSession(
-          id: 'ses-01',
-          title: 'Bedah Trik Cepat Dinamika Rotasi & Momen Inersia',
-          subject: 'Fisika SMA (Kelas 12)',
-          tutorName: 'Kak Dimas Prasetyo, S.Si.',
-          tutorTitle: 'Master Tutor Fisika (Alumnus ITB)',
-          dateTimeFormatted: 'Hari ini, 29 September 2026',
-          timeRange: '16.00 - 17.30 WIB',
-          type: 'Privat 1-on-1 (Online)',
-          status: 'Sedang Berlangsung',
-          meetLink: 'https://meet.google.com/ckr-fsk-12b',
-          topic: 'Hukum Kekekalan Momentum Sudut & Aplikasi Katrol Pejal',
-        ),
-        const LiveSession(
-          id: 'ses-02',
-          title: 'Strategi 60 Detik Tembus Penalaran Kuantitatif SNBT',
-          subject: 'TPS UTBK-SNBT',
-          tutorName: 'Kak Sarah Nabilla, M.Sc.',
-          tutorTitle: 'Spesialis Penalaran Matematika (Alumna UI)',
-          dateTimeFormatted: 'Besok, 30 September 2026',
-          timeRange: '19.00 - 20.30 WIB',
-          type: 'Live Class Grup Supercamp',
-          status: 'Mendatang',
-          meetLink: 'https://meet.google.com/ckr-snbt-tps',
-          topic: 'Aljabar Lanjut, Operasi Aritmetika Baru, & Himpunan',
-        ),
-        const LiveSession(
-          id: 'ses-03',
-          title: 'Tutor Datang ke Rumah: Stoikiometri & Larutan Asam-Basa',
-          subject: 'Kimia SMA',
-          tutorName: 'Kak Fikri Ramadhan, S.Pd.',
-          tutorTitle: 'Tutor Kimia Terbaik Cakrawala',
-          dateTimeFormatted: 'Kamis, 02 Oktober 2026',
-          timeRange: '15.30 - 17.00 WIB',
-          type: 'Privat Home Tutoring (Offline)',
-          status: 'Mendatang',
-          meetLink: 'Lokasi: Rumah Siswa (Tutor Siap Hadir)',
-          topic: 'Titrasi Asam Basa dan Perhitungan pH Larutan Penyangga',
-        ),
-      ];
+    const LiveSession(
+      id: 'ses-01',
+      title: 'Bedah Trik Cepat Dinamika Rotasi & Momen Inersia',
+      subject: 'Fisika SMA (Kelas 12)',
+      tutorName: 'Kak Dimas Prasetyo, S.Si.',
+      tutorTitle: 'Master Tutor Fisika (Alumnus ITB)',
+      dateTimeFormatted: 'Hari ini, 29 September 2026',
+      timeRange: '16.00 - 17.30 WIB',
+      type: 'Privat 1-on-1 (Online)',
+      status: 'Sedang Berlangsung',
+      meetLink: 'https://meet.google.com/ckr-fsk-12b',
+      topic: 'Hukum Kekekalan Momentum Sudut & Aplikasi Katrol Pejal',
+    ),
+    const LiveSession(
+      id: 'ses-02',
+      title: 'Strategi 60 Detik Tembus Penalaran Kuantitatif SNBT',
+      subject: 'TPS UTBK-SNBT',
+      tutorName: 'Kak Sarah Nabilla, M.Sc.',
+      tutorTitle: 'Spesialis Penalaran Matematika (Alumna UI)',
+      dateTimeFormatted: 'Besok, 30 September 2026',
+      timeRange: '19.00 - 20.30 WIB',
+      type: 'Live Class Grup Supercamp',
+      status: 'Mendatang',
+      meetLink: 'https://meet.google.com/ckr-snbt-tps',
+      topic: 'Aljabar Lanjut, Operasi Aritmetika Baru, & Himpunan',
+    ),
+    const LiveSession(
+      id: 'ses-03',
+      title: 'Tutor Datang ke Rumah: Stoikiometri & Larutan Asam-Basa',
+      subject: 'Kimia SMA',
+      tutorName: 'Kak Fikri Ramadhan, S.Pd.',
+      tutorTitle: 'Tutor Kimia Terbaik Cakrawala',
+      dateTimeFormatted: 'Kamis, 02 Oktober 2026',
+      timeRange: '15.30 - 17.00 WIB',
+      type: 'Privat Home Tutoring (Offline)',
+      status: 'Mendatang',
+      meetLink: 'Lokasi: Rumah Siswa (Tutor Siap Hadir)',
+      topic: 'Titrasi Asam Basa dan Perhitungan pH Larutan Penyangga',
+    ),
+  ];
 }

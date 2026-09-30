@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/bimbel_logo.dart';
 import '../../parent/screens/parent_monitoring_screen.dart';
 import '../../student/screens/student_dashboard_screen.dart';
+import '../../tutor/screens/tutor_dashboard_screen.dart';
+import '../../../core/services/portal_api_service.dart';
 
 class BimbelLoginScreen extends StatefulWidget {
   const BimbelLoginScreen({super.key});
@@ -20,6 +22,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String? _errorMessage;
+  bool _isLoading = false;
 
   static final _accounts = [
     BimbelConstants.demoStudent,
@@ -62,31 +65,49 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
     });
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
-
-    final account = _recognizedAccount;
-    if (account == null || account['password'] != _passwordController.text) {
-      setState(() => _errorMessage = 'Email atau kata sandi belum sesuai.');
-      return;
-    }
-
-    if (account['role'] == 'Orang Tua') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const ParentMonitoringScreen()),
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final user = await PortalApiService.instance.login(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
-    } else if (account['role'] == 'Siswa') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
-      );
-    } else {
-      setState(
-        () => _errorMessage =
-            'Akun tutor dikenali, tetapi dashboard tutor belum tersedia.',
-      );
+      if (!mounted) return;
+      final role = user['role'];
+      await PortalApiService.instance.dashboard(role as String);
+      if (!mounted) return;
+      if (role == 'parent') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ParentMonitoringScreen()),
+        );
+      } else if (role == 'student') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
+        );
+      } else if (role == 'tutor') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const TutorDashboardScreen()),
+        );
+      } else {
+        await PortalApiService.instance.logout();
+        setState(() => _errorMessage = 'Role akun belum memiliki dashboard.');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(
+          () => _errorMessage = e.toString().replaceFirst('Exception: ', ''),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -350,10 +371,10 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
               width: double.infinity,
               height: 54,
               child: ElevatedButton.icon(
-                onPressed: _handleLogin,
+                onPressed: _isLoading ? null : _handleLogin,
                 icon: const Icon(Icons.arrow_forward_rounded, size: 19),
                 label: Text(
-                  'Masuk Sekarang',
+                  _isLoading ? 'Memeriksa akun...' : 'Masuk Sekarang',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,

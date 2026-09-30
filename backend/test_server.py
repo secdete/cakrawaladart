@@ -29,6 +29,7 @@ class LandingApiTests(unittest.TestCase):
 
     def setUp(self):
         server.lead_requests.clear()
+        server.auth_requests.clear()
 
     def request_json(self, path, payload=None, headers=None):
         data = None if payload is None else json.dumps(payload).encode("utf-8")
@@ -90,6 +91,44 @@ class LandingApiTests(unittest.TestCase):
         status, body = self.request_json("/api/admin/leads")
         self.assertEqual(status, 503)
         self.assertIn("ADMIN_API_TOKEN", body["error"])
+
+    def test_login_dashboard_roles_and_tryout_persistence(self):
+        status, login = self.request_json("/api/auth/login", {"email":"farhan.arya@gmail.com", "password":"cakrawala2026"})
+        self.assertEqual(status, 200)
+        headers = {"Authorization": f"Bearer {login['token']}"}
+        status, dashboard = self.request_json("/api/student/dashboard", headers=headers)
+        self.assertEqual(status, 200)
+        self.assertEqual(dashboard["profile"]["role"], "student")
+        self.assertEqual(len(dashboard["sessions"]), 1)
+        self.assertEqual(self.request_json("/api/tutor/dashboard", headers=headers)[0], 403)
+        status, question = self.request_json("/api/tryouts/sample/question", headers=headers)
+        self.assertEqual(status, 200)
+        self.assertNotIn("correctIndex", question["question"])
+        status, result = self.request_json("/api/tryouts/sample/answer", {"selectedIndex":0}, headers)
+        self.assertEqual(status, 200)
+        self.assertTrue(result["isCorrect"])
+        with server.connect_database() as connection:
+            count = connection.execute("SELECT COUNT(*) FROM tryout_attempts WHERE student_id='student-farhan'").fetchone()[0]
+        self.assertEqual(count, 1)
+        status, saved_question = self.request_json("/api/student/questions", {"question":"Bagaimana cara menghitung momen inersia?"}, headers)
+        self.assertEqual(status, 201)
+
+        _, tutor_login = self.request_json("/api/auth/login", {"email":"dimas.prasetyo@cakrawalaeducentre.com", "password":"cakrawala2026"})
+        tutor_headers = {"Authorization": f"Bearer {tutor_login['token']}"}
+        _, tutor_dashboard = self.request_json("/api/tutor/dashboard", headers=tutor_headers)
+        self.assertEqual(tutor_dashboard["questions"][0]["id"], saved_question["item"]["id"])
+        status, _ = self.request_json(f"/api/tutor/questions/{saved_question['item']['id']}/reply", {"reply":"Gunakan rumus I = jumlah m r kuadrat."}, tutor_headers)
+        self.assertEqual(status, 200)
+        _, updated = self.request_json("/api/student/dashboard", headers=headers)
+        self.assertEqual(updated["questions"][0]["status"], "Dijawab")
+
+    def test_tutor_can_write_note_for_assigned_student(self):
+        status, login = self.request_json("/api/auth/login", {"email":"dimas.prasetyo@cakrawalaeducentre.com", "password":"cakrawala2026"})
+        self.assertEqual(status, 200)
+        headers = {"Authorization": f"Bearer {login['token']}"}
+        status, response = self.request_json("/api/tutor/notes", {"studentId":"student-farhan", "topicCovered":"Gerak rotasi", "homework":"Latihan 2 soal"}, headers)
+        self.assertEqual(status, 201)
+        self.assertEqual(response["item"]["topicCovered"], "Gerak rotasi")
 
     def test_lead_rate_limit(self):
         payload = {
