@@ -111,7 +111,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final users = List<Map<String, dynamic>>.from((_data['users'] as List? ?? const []).map((e) => Map<String, dynamic>.from(e as Map)));
     final summary = Map<String, dynamic>.from(_data['summary'] as Map? ?? const {});
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FC),
+      backgroundColor: AppColors.bgCanvas,
       appBar: AppBar(
         backgroundColor: Colors.white, surfaceTintColor: Colors.white,
         title: const BimbelLogo(size: 36),
@@ -132,7 +132,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1160), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(
               width: double.infinity, padding: const EdgeInsets.all(26),
-              decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF132044), Color(0xFF2856A8)]), borderRadius: BorderRadius.circular(24)),
+              decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF0A1628), Color(0xFF1D4ED8)]), borderRadius: BorderRadius.circular(24)),
               child: Row(children: [
                 Container(width: 52, height: 52, decoration: BoxDecoration(color: Colors.white.withValues(alpha: .13), borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.space_dashboard_rounded, color: Colors.white, size: 27)),
                 const SizedBox(width: 16),
@@ -154,15 +154,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             if (_error != null) _errorPanel(),
             if (_loading && _data.isEmpty) const LinearProgressIndicator(),
             Wrap(spacing: 12, runSpacing: 12, children: [
-              _statCard('Total akun aktif', '${summary['totalUsers'] ?? 0}', Icons.groups_2_rounded, const Color(0xFF2563EB)),
-              _statCard('Siswa', '${summary['students'] ?? 0}', Icons.school_rounded, const Color(0xFF0891B2)),
-              _statCard('Tutor', '${summary['tutors'] ?? 0}', Icons.co_present_rounded, const Color(0xFF7C3AED)),
-              _statCard('Kelas aktif', '${summary['totalClasses'] ?? 0}', Icons.menu_book_rounded, const Color(0xFF059669)),
-              _statCard('Leads baru', '${summary['newLeads'] ?? 0}', Icons.mark_email_unread_rounded, const Color(0xFFEA580C)),
+              _statCard('Total akun aktif', '${summary['totalUsers'] ?? 0}', Icons.groups_2_rounded, AppColors.primaryBlueMid),
+              _statCard('Siswa', '${summary['students'] ?? 0}', Icons.school_rounded, AppColors.accentCyan),
+              _statCard('Tutor', '${summary['tutors'] ?? 0}', Icons.co_present_rounded, AppColors.accentPurple),
+              _statCard('Kelas aktif', '${summary['totalClasses'] ?? 0}', Icons.menu_book_rounded, AppColors.accentGreenDark),
+              _statCard('Leads baru', '${summary['newLeads'] ?? 0}', Icons.mark_email_unread_rounded, AppColors.accentOrange),
             ]),
             const SizedBox(height: 24),
             Row(children: [
-              Expanded(child: Text('Operasional', style: GoogleFonts.plusJakartaSans(fontSize: 21, fontWeight: FontWeight.w800, color: const Color(0xFF18243B)))),
+              Expanded(child: Text('Operasional', style: GoogleFonts.plusJakartaSans(fontSize: 21, fontWeight: FontWeight.w800, color: AppColors.textHeading))),
               if (MediaQuery.sizeOf(context).width <= 650) ...[
                 IconButton.filledTonal(onPressed: _openClasses, tooltip: 'Kelola kelas', icon: const Icon(Icons.menu_book_rounded)),
                 IconButton.filledTonal(onPressed: _showCreateUser, tooltip: 'Tambah akun', icon: const Icon(Icons.person_add_alt_1)),
@@ -187,10 +187,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _statCard(String title, String value, IconData icon, Color color) => SizedBox(
     width: 265,
-    child: Card(color: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Color(0xFFE7ECF4))), child: Padding(padding: const EdgeInsets.all(17), child: Row(children: [
+    child: Card(color: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: AppColors.borderSubtle)), child: Padding(padding: const EdgeInsets.all(17), child: Row(children: [
       Container(width: 44, height: 44, decoration: BoxDecoration(color: color.withValues(alpha: .1), borderRadius: BorderRadius.circular(14)), child: Icon(icon, color: color)),
       const SizedBox(width: 13),
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w800, color: const Color(0xFF18243B))), Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: const Color(0xFF64748B))) ]),
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textHeading)), Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.textSecondary)) ]),
     ]))),
   );
 
@@ -198,16 +198,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     if (leads.isEmpty) return _emptyState(Icons.inbox_outlined, 'Belum ada permintaan', 'Permintaan konsultasi dari calon siswa akan muncul di sini.');
     return Column(children: leads.map((lead) => Card(
       margin: const EdgeInsets.only(bottom: 10), color: Colors.white, elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFE7ECF4))),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.borderSubtle)),
       child: Padding(padding: const EdgeInsets.all(16), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const CircleAvatar(backgroundColor: Color(0xFFEAF2FF), child: Icon(Icons.person_outline_rounded, color: Color(0xFF2563EB))),
+        const CircleAvatar(backgroundColor: AppColors.primaryBluePale, child: Icon(Icons.person_outline_rounded, color: AppColors.primaryBlueMid)),
         const SizedBox(width: 14),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('${lead['name'] ?? 'Tanpa nama'}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, color: const Color(0xFF1E293B))),
+          Text('${lead['name'] ?? 'Tanpa nama'}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, color: AppColors.textHeading)),
           const SizedBox(height: 4),
-          Text('${lead['phone'] ?? '-'}${(lead['email'] ?? '').toString().isEmpty ? '' : ' · ${lead['email']}'}', style: const TextStyle(color: Color(0xFF64748B))),
+          Text('${lead['phone'] ?? '-'}${(lead['email'] ?? '').toString().isEmpty ? '' : ' · ${lead['email']}'}', style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 4),
-          Text('${lead['grade'] ?? '-'}  ·  ${lead['source'] ?? 'Website'}', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+          Text('${lead['grade'] ?? '-'}  ·  ${lead['source'] ?? 'Website'}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
         ])),
         _statusBadge('${lead['status'] ?? 'new'}'),
       ])),
@@ -221,9 +221,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       final labels = {'student': 'Siswa', 'parent': 'Orang tua', 'tutor': 'Tutor', 'admin': 'Admin'};
       return Card(
         margin: const EdgeInsets.only(bottom: 9), color: Colors.white, elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15), side: const BorderSide(color: Color(0xFFE7ECF4))),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15), side: const BorderSide(color: AppColors.borderSubtle)),
         child: ListTile(
-          leading: CircleAvatar(backgroundColor: const Color(0xFFEAF2FF), child: Icon(role == 'tutor' ? Icons.co_present_rounded : role == 'admin' ? Icons.shield_outlined : Icons.person_outline_rounded, color: const Color(0xFF2563EB))),
+          leading: CircleAvatar(backgroundColor: AppColors.primaryBluePale, child: Icon(role == 'tutor' ? Icons.co_present_rounded : role == 'admin' ? Icons.shield_outlined : Icons.person_outline_rounded, color: AppColors.primaryBlueMid)),
           title: Text('${user['name'] ?? 'Pengguna'}', style: const TextStyle(fontWeight: FontWeight.w700)),
           subtitle: Text('${user['email'] ?? ''}'),
           trailing: _statusBadge(labels[role] ?? role),
@@ -232,7 +232,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }).toList());
   }
 
-  Widget _statusBadge(String text) => Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(30)), child: Text(text, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF1D4ED8))));
+  Widget _statusBadge(String text) => Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: AppColors.primaryBluePale, borderRadius: BorderRadius.circular(30)), child: Text(text, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primaryBlue)));
 
-  Widget _emptyState(IconData icon, String title, String description) => Card(color: Colors.white, elevation: 0, child: Padding(padding: const EdgeInsets.symmetric(vertical: 38, horizontal: 20), child: Column(children: [Icon(icon, size: 36, color: const Color(0xFF94A3B8)), const SizedBox(height: 12), Text(title, style: const TextStyle(fontWeight: FontWeight.w800)), const SizedBox(height: 5), Text(description, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF64748B)))])));
+  Widget _emptyState(IconData icon, String title, String description) => Card(color: Colors.white, elevation: 0, child: Padding(padding: const EdgeInsets.symmetric(vertical: 38, horizontal: 20), child: Column(children: [Icon(icon, size: 36, color: AppColors.textSecondary), const SizedBox(height: 12), Text(title, style: const TextStyle(fontWeight: FontWeight.w800)), const SizedBox(height: 5), Text(description, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary))])));
 }

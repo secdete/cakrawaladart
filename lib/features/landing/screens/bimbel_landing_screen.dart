@@ -25,7 +25,7 @@ class BimbelLandingScreen extends StatefulWidget {
 }
 
 class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
-  static const _ceoImageAsset = 'assets/images/ceo_cakrawala.jpg';
+  static const _ceoImageAsset = 'assets/images/ceo/ceo_cakrawala.jpg';
   String _selectedGradeFilter = 'SMA - Kelas 12';
   final _api = LandingApiService();
   late Future<List<BimbelProgram>> _programsFuture;
@@ -276,9 +276,9 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF0284C7).withValues(alpha: 0.25),
+            color: AppColors.primaryBlue.withValues(alpha: 0.25),
             border: Border.all(
-              color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+              color: AppColors.primaryBlueLight.withValues(alpha: 0.5),
             ),
             borderRadius: BorderRadius.circular(20),
           ),
@@ -287,7 +287,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             children: [
               const Icon(
                 Icons.verified_rounded,
-                color: Color(0xFF38BDF8),
+                color: AppColors.primaryBlueLight,
                 size: 16,
               ),
               const SizedBox(width: 6),
@@ -296,7 +296,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                   'Layanan Resmi Bimbel PT Indo Prestasi Utama',
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.plusJakartaSans(
-                    color: const Color(0xFFE0F2FE),
+                    color: AppColors.accentCyanLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -362,7 +362,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
               label: const Text('Konsultasi Gratis via WA'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.white,
-                side: const BorderSide(color: Color(0xFF64748B)),
+                side: const BorderSide(color: AppColors.primaryBlueLight, width: 1.5),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 16,
@@ -577,8 +577,8 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
   Widget _buildKeyMetricsBar(bool isDesktop) {
     return Container(
       width: double.infinity,
-      color: const Color(0xFFEEF4FF),
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+      color: AppColors.primaryBlue,
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1200),
@@ -610,9 +610,9 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
         Text(
           value,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 24,
+            fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.primaryBlue,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 4),
@@ -621,7 +621,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary,
+            color: Colors.white.withValues(alpha: 0.75),
           ),
         ),
       ],
@@ -632,7 +632,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     return Container(
       key: _programsSectionKey,
       width: double.infinity,
-      color: const Color(0xFFF7F4FF),
+      color: const Color(0xFFDBEAFE),
       padding: EdgeInsets.symmetric(
         vertical: 40,
         horizontal: isDesktop ? 64 : 20,
@@ -794,7 +794,9 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
   );
 
   Widget _buildRuangguruStyleCard(BimbelProgram program) {
-    return Container(
+    return _HoverCard(
+      shadowColor: AppColors.primaryBlue,
+      child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -850,16 +852,16 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
+                          color: AppColors.primaryBluePale,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                          border: Border.all(color: AppColors.borderBlue),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               program.badgeIcon,
                               size: 13,
-                              color: const Color(0xFF1D4ED8),
+                              color: AppColors.primaryBlue,
                             ),
                             const SizedBox(width: 5),
                             Expanded(
@@ -870,7 +872,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF1D4ED8),
+                                  color: AppColors.primaryBlue,
                                 ),
                               ),
                             ),
@@ -1030,7 +1032,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                         program: program,
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF6B00),
+                        backgroundColor: AppColors.accentOrange,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -1053,7 +1055,8 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
           ),
         ],
       ),
-    );
+    ), // close _HoverCard child Container
+    ); // close _HoverCard
   }
 
   Widget _buildCleanCardIcon(String type) {
@@ -1101,7 +1104,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     return Container(
       margin: const EdgeInsets.only(top: 48),
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
-      color: const Color(0xFFF2F7FC),
+      color: AppColors.bgBlueSoft,
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),
@@ -1196,16 +1199,16 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                       vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEAF6FC),
+                      color: AppColors.primaryBluePale,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFC7EAF8)),
+                      border: Border.all(color: AppColors.borderBlue),
                     ),
                     child: Text(
                       program,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF075985),
+                        color: AppColors.primaryBlue,
                       ),
                     ),
                   ),
@@ -1297,21 +1300,28 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F7FC),
+        color: AppColors.primaryBlue,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFCBEAF5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionEyebrow('KENALI CARA BELAJARNYA'),
+          Text(
+            'KENALI CARA BELAJARNYA',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              letterSpacing: 1.1,
+              fontWeight: FontWeight.w800,
+              color: AppColors.accentOrangeMid,
+            ),
+          ),
           const SizedBox(height: 12),
           Text(
             'Keunggulan Cakrawala Educentre',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: AppColors.textHeading,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 20),
@@ -1361,234 +1371,419 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     String desc,
     Color accentColor,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(22),
+    return _HoverCard(
+      scale: 1.04,
+      shadowColor: Colors.white,
+      child: Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.bgCanvas,
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: accentColor, size: 24),
+            child: Icon(icon, color: Colors.white, size: 22),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             title,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textHeading,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             desc,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: AppColors.textBody,
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.75),
               height: 1.5,
             ),
           ),
         ],
       ),
-    );
+    ), // close _HoverCard child
+    ); // close _HoverCard
   }
 
   Widget _buildAboutSection() {
     return Container(
       key: _aboutSectionKey,
       width: double.infinity,
-      color: const Color(0xFFF8F6FF),
-      padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 24),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1100),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppColors.borderSubtle),
-              borderRadius: BorderRadius.circular(22),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0A1E3A8A),
-                  blurRadius: 24,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionEyebrow('PROFIL LEMBAGA'),
-                const SizedBox(height: 12),
-                Text(
-                  'Tentang Cakrawala Educentre',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textHeading,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Cakrawala Educentre adalah merek layanan pendidikan di bawah naungan ${BimbelConstants.companyName}. Layanannya mencakup les privat akademik maupun non-akademik, dengan pilihan penyelenggaraan secara online dan offline. Cakrawala Educentre menyatakan fokus pada kurikulum Nasional dan Internasional.',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    height: 1.8,
-                    color: AppColors.textBody,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Program yang dipublikasikan meliputi TKA untuk SD dan SMP, Bahasa Indonesia, IPAS, English Club, Maths Club, UTBK, serta Kedinasan. Pilihan ini mencakup pendampingan untuk kebutuhan belajar sekolah dan persiapan seleksi. Siswa dan orang tua dapat berkonsultasi untuk mengetahui program, format kelas, serta ketersediaan tutor yang sesuai dengan lokasi dan jadwal.',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    height: 1.8,
-                    color: AppColors.textBody,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Wrap(
-                  spacing: 9,
-                  runSpacing: 9,
-                  children: [
-                    _buildAboutFact(
-                      Icons.business_rounded,
-                      BimbelConstants.companyName,
-                    ),
-                    _buildAboutFact(
-                      Icons.laptop_chromebook_rounded,
-                      'Online & offline',
-                    ),
-                    _buildAboutFact(
-                      Icons.menu_book_rounded,
-                      'Kurikulum Nasional & Internasional',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                TextButton.icon(
-                  onPressed: () => launchUrl(
-                    Uri.parse('https://cakrawalaeducentre.com/'),
-                    mode: LaunchMode.externalApplication,
-                  ),
-                  icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                  label: const Text('Lihat informasi di situs resmi'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primaryBlue,
-                    padding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
-            ),
-          ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1D4ED8), Color(0xFF1E3A8A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
       ),
-    );
-  }
-
-  Widget _buildAboutFact(IconData icon, String text) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF3F7FC),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16, color: AppColors.primaryBlue),
-        const SizedBox(width: 7),
-        Text(
-          text,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textBody,
-          ),
-        ),
-      ],
-    ),
-  );
-
-  Widget _buildCeoSection() {
-    return Container(
-      width: double.infinity,
-      color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 24),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final isWide = constraints.maxWidth >= 760;
-              final photo = AspectRatio(
-                aspectRatio: 4 / 5,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    _ceoImageAsset,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                    semanticLabel: 'CEO Cakrawala Educentre',
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: const Color(0xFFE8EEF7),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.person_rounded,
-                        size: 72,
-                        color: AppColors.primaryBlue,
+              final isWide = constraints.maxWidth >= 700;
+              final textContent = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Eyebrow
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentOrange.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.accentOrange.withValues(alpha: 0.5)),
+                    ),
+                    child: Text(
+                      'PROFIL LEMBAGA',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.accentOrangeMid,
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Tentang\nCakrawala Educentre',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: isWide ? 32 : 26,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Cakrawala Educentre adalah merek layanan pendidikan di bawah naungan ${BimbelConstants.companyName}. Kami hadir dengan les privat akademik maupun non-akademik — online maupun offline — dengan fokus pada kurikulum Nasional dan Internasional.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      height: 1.8,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Stats row
+                  Wrap(
+                    spacing: 20,
+                    runSpacing: 14,
+                    children: [
+                      _buildAboutStat('15.000+', 'Sesi Les'),
+                      _buildAboutStat('350+', 'Master Tutor'),
+                      _buildAboutStat('94.8%', 'Lolos PTN'),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+                  ElevatedButton.icon(
+                    onPressed: () => launchUrl(
+                      Uri.parse('https://cakrawalaeducentre.com/'),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                    label: const Text(''),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accentOrange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      textStyle: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                  ),
+                ],
               );
+
+              final infoCards = Column(
+                children: [
+                  _buildAboutInfoCard(
+                    Icons.business_rounded,
+                    BimbelConstants.companyName,
+                    'Naungan resmi lembaga',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildAboutInfoCard(
+                    Icons.devices_rounded,
+                    'Online & Offline',
+                    'Fleksibel sesuai kebutuhan',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildAboutInfoCard(
+                    Icons.menu_book_rounded,
+                    'Kurikulum Nasional & Internasional',
+                    'TK, SD, SMP, SMA, UTBK, Kedinasan',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildAboutInfoCard(
+                    Icons.verified_rounded,
+                    'Garansi Cocok Tutor',
+                    'Kepuasan siswa adalah prioritas',
+                  ),
+                ],
+              );
+
+              if (!isWide) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [textContent, const SizedBox(height: 32), infoCards],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(flex: 5, child: textContent),
+                  const SizedBox(width: 40),
+                  Expanded(flex: 4, child: infoCards),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAboutStat(String value, String label) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        value,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          color: AppColors.accentOrangeMid,
+        ),
+      ),
+      Text(
+        label,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: Colors.white.withValues(alpha: 0.65),
+        ),
+      ),
+    ],
+  );
+
+  Widget _buildAboutInfoCard(IconData icon, String title, String subtitle) =>
+    _HoverCard(
+      scale: 1.025,
+      shadowColor: AppColors.accentOrange,
+      child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.accentOrange.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: AppColors.accentOrangeMid, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: Colors.white.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ), // close _HoverCard child
+    ); // close _HoverCard
+
+
+  Widget _buildCeoSection() {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF0A1628), Color(0xFF0F2B5B)],
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 72, horizontal: 24),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth >= 760;
+
+              // Photo with decorative frame
+              final photo = Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Blue accent ring behind photo
+                  Positioned(
+                    top: -12, left: -12,
+                    right: 12, bottom: 12,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.accentOrange.withValues(alpha: 0.5),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  AspectRatio(
+                    aspectRatio: 3 / 4,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Image.asset(
+                        _ceoImageAsset,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        semanticLabel: 'CEO Cakrawala Educentre',
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.primaryBlue.withValues(alpha: 0.3),
+                                AppColors.primaryBlue.withValues(alpha: 0.6),
+                              ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.person_rounded,
+                            size: 80,
+                            color: Colors.white54,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+
+              // Text content
               final message = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionEyebrow('PESAN DARI CEO'),
-                  const SizedBox(height: 14),
+                  // Eyebrow badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentOrange.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.accentOrange.withValues(alpha: 0.45)),
+                    ),
+                    child: Text(
+                      'PESAN DARI CEO',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.accentOrangeMid,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Large quote mark
+                  Text(
+                    '\u201C',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 72,
+                      height: 0.6,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.accentOrange.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Text(
                     'Tumbuh bersama potensi terbaik setiap anak.',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: isWide ? 28 : 24,
-                      height: 1.25,
+                      fontSize: isWide ? 28 : 22,
+                      height: 1.3,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textHeading,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     'Sebagai CEO Cakrawala Educentre, saya percaya setiap anak memiliki potensi yang perlu pendampingan belajar yang tepat. Kami hadir sebagai mitra orang tua untuk mendampingi tumbuh kembang anak melalui layanan yang personal, profesional, dan bermakna.',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
+                      fontSize: 14,
                       height: 1.8,
-                      color: AppColors.textBody,
+                      color: Colors.white.withValues(alpha: 0.75),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Container(
-                    width: 46,
-                    height: 3,
-                    color: AppColors.accentOrange,
-                  ),
-                  const SizedBox(height: 13),
-                  Text(
-                    'CEO Cakrawala Educentre',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primaryBlue,
-                    ),
+                  const SizedBox(height: 28),
+                  // Divider + name
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: AppColors.accentOrange,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'CEO & Founder',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Cakrawala Educentre',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primaryBlueLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               );
@@ -1597,8 +1792,16 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(width: 240, child: photo),
-                    const SizedBox(height: 30),
+                    Center(
+                      child: SizedBox(
+                        width: 220,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 12, left: 12),
+                          child: photo,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 36),
                     message,
                   ],
                 );
@@ -1607,8 +1810,14 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(width: 330, child: photo),
-                  const SizedBox(width: 72),
+                  SizedBox(
+                    width: 300,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12, left: 12),
+                      child: photo,
+                    ),
+                  ),
+                  const SizedBox(width: 64),
                   Expanded(child: message),
                 ],
               );
@@ -1622,8 +1831,8 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
   Widget _buildTestimonialsSection(bool isDesktop) {
     return Container(
       width: double.infinity,
-      color: const Color(0xFFF1F5FF),
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
+      color: AppColors.brandNavy,
+      padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),
@@ -1635,7 +1844,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textHeading,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1644,7 +1853,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: Colors.white.withValues(alpha: 0.65),
                 ),
               ),
               const SizedBox(height: 32),
@@ -1691,12 +1900,15 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
   }
 
   Widget _buildTestimonialItem(String name, String role, String quote) {
-    return Container(
+    return _HoverCard(
+      scale: 1.025,
+      shadowColor: AppColors.primaryBlue,
+      child: Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF1A2E4A),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: AppColors.primaryBlueMid.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1717,7 +1929,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontStyle: FontStyle.italic,
-              color: AppColors.textBody,
+              color: Colors.white.withValues(alpha: 0.8),
               height: 1.5,
             ),
           ),
@@ -1727,20 +1939,21 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textHeading,
+              color: Colors.white,
             ),
           ),
           Text(
             role,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
-              color: AppColors.accentCyan,
+              color: AppColors.accentOrangeMid,
               fontWeight: FontWeight.w600,
             ),
           ),
         ],
       ),
-    );
+    ), // close _HoverCard child
+    ); // close _HoverCard
   }
 
   Widget _buildCtaConsultationSection(BuildContext context) {
@@ -1804,8 +2017,8 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: Color(0xFFF2F0FF),
-        border: Border(top: BorderSide(color: Color(0xFFE3E0FA))),
+        color: AppColors.bgBlue,
+        border: Border(top: BorderSide(color: AppColors.borderBlue)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 44, 24, 20),
       child: Center(
@@ -1865,7 +2078,7 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
                   ],
                 ),
               const SizedBox(height: 32),
-              const Divider(color: Color(0xFFD9D6EE), height: 1),
+              const Divider(color: AppColors.borderBlue, height: 1),
               const SizedBox(height: 16),
               Text(
                 '© 2026 ${BimbelConstants.appName} · ${BimbelConstants.companyName}',
@@ -1967,9 +2180,9 @@ class _BimbelLandingScreenState extends State<BimbelLandingScreen> {
             height: 112,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFFE4EAF4),
+              color: AppColors.primaryBluePale,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFD5DCEC)),
+              border: Border.all(color: AppColors.borderBlue),
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -2088,4 +2301,59 @@ class _MapGridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Reusable hover card — lifts and scales on mouse hover.
+/// On mobile (no pointer) the child renders without animation overhead.
+class _HoverCard extends StatefulWidget {
+  const _HoverCard({
+    required this.child,
+    this.scale = 1.030,
+    this.shadowColor,
+  });
+
+  final Widget child;
+  final double scale;
+  final Color? shadowColor;
+
+  @override
+  State<_HoverCard> createState() => _HoverCardState();
+}
+
+class _HoverCardState extends State<_HoverCard> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const duration = Duration(milliseconds: 180);
+    const curve = Curves.easeOutCubic;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedScale(
+        scale: _hovered ? widget.scale : 1.0,
+        duration: duration,
+        curve: curve,
+        child: AnimatedContainer(
+          duration: duration,
+          curve: curve,
+          decoration: BoxDecoration(
+            boxShadow: _hovered
+                ? [
+                    BoxShadow(
+                      color: (widget.shadowColor ?? Colors.black)
+                          .withValues(alpha: 0.22),
+                      blurRadius: 32,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 10),
+                    ),
+                  ]
+                : [],
+          ),
+          child: widget.child,
+        ),
+      ),
+    );
+  }
 }

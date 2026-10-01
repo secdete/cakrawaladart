@@ -122,7 +122,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 980;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FD),
+      backgroundColor: AppColors.bgCanvas,
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
@@ -140,12 +140,12 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
           const Positioned(
             top: -170,
             right: -100,
-            child: _DecorativeOrb(size: 390, color: Color(0x1A2563EB)),
+            child: _DecorativeOrb(size: 390, color: Color(0x1A1D4ED8)),
           ),
           const Positioned(
             bottom: -210,
             left: -90,
-            child: _DecorativeOrb(size: 430, color: Color(0x1538BDF8)),
+            child: _DecorativeOrb(size: 430, color: Color(0x151D4ED8)),
           ),
           Center(
             child: SingleChildScrollView(
@@ -183,7 +183,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFE8F2FF),
+              color: AppColors.primaryBlueSoft,
               borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
@@ -212,7 +212,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 15,
               height: 1.7,
-              color: const Color(0xFF64748B),
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 30),
@@ -244,7 +244,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: const Color(0xFFE9EEF5)),
+        border: Border.all(color: AppColors.borderSubtle),
         boxShadow: const [
           BoxShadow(
             color: Color(0x142B3B58),
@@ -263,7 +263,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 25,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF172033),
+                color: AppColors.textHeading,
               ),
             ),
             const SizedBox(height: 7),
@@ -273,7 +273,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
                   : 'Gunakan email akun Cakrawala yang terdaftar.',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
-                color: const Color(0xFF71819B),
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 26),
@@ -341,7 +341,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
                         _obscurePassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: const Color(0xFF64748B),
+                        color: AppColors.textSecondary,
                         size: 20,
                       ),
                     ),
@@ -491,9 +491,9 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F8FF),
+        color: AppColors.bgBlue,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFBAE6FD)),
+        border: Border.all(color: AppColors.borderBlue),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,7 +511,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF24324A),
+                  color: AppColors.textHeading,
                 ),
               ),
             ],
@@ -540,7 +540,7 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
         _handleLogin();
       },
       backgroundColor: Colors.white,
-      side: const BorderSide(color: Color(0xFFBAE6FD)),
+      side: const BorderSide(color: AppColors.borderBlue),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
       labelStyle: GoogleFonts.plusJakartaSans(
         fontSize: 11,
@@ -564,17 +564,17 @@ class _BimbelLoginScreenState extends State<BimbelLoginScreen> {
     required IconData icon,
   }) => InputDecoration(
     hintText: hint,
-    prefixIcon: Icon(icon, size: 20, color: const Color(0xFF64748B)),
+    prefixIcon: Icon(icon, size: 20, color: AppColors.textSecondary),
     filled: true,
-    fillColor: const Color(0xFFF8FAFC),
+    fillColor: AppColors.bgCanvas,
     contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 17),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(13),
-      borderSide: const BorderSide(color: Color(0xFFD9E2EF)),
+      borderSide: const BorderSide(color: AppColors.borderSubtle),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(13),
-      borderSide: const BorderSide(color: Color(0xFFD9E2EF)),
+      borderSide: const BorderSide(color: AppColors.borderSubtle),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(13),
@@ -629,7 +629,7 @@ class _BenefitRow extends StatelessWidget {
             Text(
               title,
               style: GoogleFonts.plusJakartaSans(
-                color: const Color(0xFF24324A),
+                color: AppColors.textHeading,
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
               ),
@@ -638,7 +638,7 @@ class _BenefitRow extends StatelessWidget {
             Text(
               subtitle,
               style: GoogleFonts.plusJakartaSans(
-                color: const Color(0xFF71819B),
+                color: AppColors.textSecondary,
                 fontSize: 11,
               ),
             ),
